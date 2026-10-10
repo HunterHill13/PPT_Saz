@@ -35,6 +35,13 @@ if str(_SCRIPTS_DIR) not in sys.path:
 
 from console_encoding import configure_utf8_stdio
 from icon_mapper import get_icon_svg_content
+from archetype_layouts import (
+    BentoGridRenderer,
+    SwissAcademicRenderer,
+    NeoBrutalistRenderer,
+    WarmEditorialRenderer,
+    RoyalGoldRenderer,
+)
 
 configure_utf8_stdio()
 
@@ -386,7 +393,18 @@ class SlideRenderer:
         return "\n".join(svg)
 
     def render_content_cards_slide(self, slide: Dict[str, Any], slide_idx: int = 2) -> str:
-        """Slidesgo Feature Cards with Circular Protruding Medallion Crowns and Rotating Halos."""
+        """Slidesgo Feature Cards with distinct layout architecture per archetype."""
+        if self.archetype == "apple_bento":
+            return BentoGridRenderer.render_pillars(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "swiss_academic":
+            return SwissAcademicRenderer.render_pillars(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "neo_brutalist":
+            return NeoBrutalistRenderer.render_pillars(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "warm_editorial":
+            return WarmEditorialRenderer.render_pillars(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "royal_gold":
+            return RoyalGoldRenderer.render_pillars(self, slide, slide_idx=slide_idx)
+
         title = slide.get("title", "عنوان اسلاید")
         kicker = slide.get("kicker", "ارکان کلیدی")
         cards = slide.get("cards", [])
@@ -468,7 +486,18 @@ class SlideRenderer:
         return "\n".join(svg)
 
     def render_process_steps_slide(self, slide: Dict[str, Any], slide_idx: int = 3) -> str:
-        """Slidesgo Circular Orbital Milestones with rotating dashed halos & verbatim capsule pods."""
+        """Process Steps Slide with distinct layout architecture per archetype."""
+        if self.archetype == "apple_bento":
+            return BentoGridRenderer.render_process_steps(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "swiss_academic":
+            return SwissAcademicRenderer.render_process_steps(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "neo_brutalist":
+            return NeoBrutalistRenderer.render_process_steps(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "warm_editorial":
+            return WarmEditorialRenderer.render_process_steps(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "royal_gold":
+            return RoyalGoldRenderer.render_process_steps(self, slide, slide_idx=slide_idx)
+
         title = slide.get("title", "فرآیند پیاده‌سازی")
         kicker = slide.get("kicker", "نقشه راه گام‌به‌گام")
         steps = slide.get("steps", slide.get("cards", []))
@@ -554,7 +583,18 @@ class SlideRenderer:
         return "\n".join(svg)
 
     def render_stats_kpi_slide(self, slide: Dict[str, Any], image_rel_path: Optional[str] = None, slide_idx: int = 4) -> str:
-        """Slidesgo Circular Radial Gauges and KPI Dial pods with rotating calibration halos."""
+        """KPI Stats Slide with distinct layout architecture per archetype."""
+        if self.archetype == "apple_bento":
+            return BentoGridRenderer.render_stats_kpi(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "swiss_academic":
+            return SwissAcademicRenderer.render_stats_kpi(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "neo_brutalist":
+            return NeoBrutalistRenderer.render_stats_kpi(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "warm_editorial":
+            return WarmEditorialRenderer.render_stats_kpi(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "royal_gold":
+            return RoyalGoldRenderer.render_stats_kpi(self, slide, slide_idx=slide_idx)
+
         title = slide.get("title", "شاخص‌های کلیدی عملکرد")
         kicker = slide.get("kicker", "آمار و تاثیر")
         kpis = slide.get("kpis", slide.get("cards", []))
@@ -686,6 +726,17 @@ class SlideRenderer:
 
     def render_comparison_slide(self, slide: Dict[str, Any], slide_idx: int = 5) -> str:
         """Slidesgo Versus Matrix with central rotating Circular Battle Emblem (VS)."""
+        if self.archetype == "apple_bento":
+            return BentoGridRenderer.render_comparison(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "swiss_academic":
+            return SwissAcademicRenderer.render_comparison(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "neo_brutalist":
+            return NeoBrutalistRenderer.render_comparison(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "warm_editorial":
+            return WarmEditorialRenderer.render_comparison(self, slide, slide_idx=slide_idx)
+        elif self.archetype == "royal_gold":
+            return RoyalGoldRenderer.render_comparison(self, slide, slide_idx=slide_idx)
+
         title = slide.get("title", "مقایسه رویکرد سنتی و مدرن")
         kicker = slide.get("kicker", "تحلیل تطبیقی")
         col_a = slide.get("col_a", {"title": "روش‌های سنتی", "items": ["سرعت کند پردازش", "خطای انسانی بالا", "هزینه‌های نگهداری سنگین"]})

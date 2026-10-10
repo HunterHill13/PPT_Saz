@@ -1,7 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
-test_project/
-project_run/
-*.tmp
-.DS_Store
+projects/
+*.pptx
+!examples/*.pptx

@@ -1,0 +1,67 @@
+{
+  "corporate_blue": {
+    "name": "Corporate Blue / سرمه‌ای سازمانی",
+    "background": "#0B132B",
+    "surface": "#1C2541",
+    "surface_border": "#3A506B",
+    "primary": "#48CAE4",
+    "secondary": "#00B4D8",
+    "text_main": "#F8FAFC",
+    "text_muted": "#94A3B8",
+    "accent": "#F59E0B",
+    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "font_en": "Segoe UI, Inter, sans-serif"
+  },
+  "modern_dark_indigo": {
+    "name": "Modern Dark Indigo / بنفش و نئون استارتاپی",
+    "background": "#0F0F1A",
+    "surface": "#1A1A2E",
+    "surface_border": "#2E2A50",
+    "primary": "#8A2BE2",
+    "secondary": "#A855F7",
+    "text_main": "#FFFFFF",
+    "text_muted": "#A1A1AA",
+    "accent": "#EC4899",
+    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "font_en": "Inter, Segoe UI, sans-serif"
+  },
+  "clean_academic": {
+    "name": "Clean Academic / دانشگاهی و علمی روشن",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "surface_border": "#E2E8F0",
+    "primary": "#1E3A8A",
+    "secondary": "#2563EB",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "accent": "#D97706",
+    "font_fa": "Vazirmatn, B Nazanin, Tahoma",
+    "font_en": "Calibri, Georgia, Segoe UI"
+  },
+  "emerald_tech": {
+    "name": "Emerald Tech / زمردی تکنولوژی",
+    "background": "#064E3B",
+    "surface": "#065F46",
+    "surface_border": "#047857",
+    "primary": "#10B981",
+    "secondary": "#34D399",
+    "text_main": "#F0FDF4",
+    "text_muted": "#A7F3D0",
+    "accent": "#FBBF24",
+    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "font_en": "Segoe UI, Inter, sans-serif"
+  },
+  "warm_terracotta": {
+    "name": "Warm Terracotta / کرم و آجری مدرن",
+    "background": "#1C1917",
+    "surface": "#292524",
+    "surface_border": "#44403C",
+    "primary": "#F97316",
+    "secondary": "#FB923C",
+    "text_main": "#FAF5F0",
+    "text_muted": "#A8A29E",
+    "accent": "#EAB308",
+    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "font_en": "Segoe UI, Inter, sans-serif"
+  }
+}

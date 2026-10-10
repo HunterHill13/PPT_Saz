@@ -87,6 +87,37 @@ class SlideRenderer:
         self.theme = theme
         self.width = width
         self.height = height
+        self.archetype = theme.get("archetype", "cyber_hud")
+        self.is_dark = theme.get("is_dark", True)
+
+    def _card_rect(self, x: float, y: float, w: float, h: float, rx: float = 28, stroke_width: float = 2.0, top_accent: bool = True) -> List[str]:
+        """Generate style-aware card background shape and accents tailored to current art-style."""
+        out = []
+        if self.archetype == "neo_brutalist":
+            shadow_col = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
+            border_col = "#000000" if not self.is_dark else "#FFFFFF"
+            out.append(f'<rect x="{x + 8}" y="{y + 8}" width="{w}" height="{h}" rx="18" fill="{shadow_col}" />')
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="18" fill="{self.theme["surface"]}" stroke="{border_col}" stroke-width="3.5" />')
+        elif self.archetype == "swiss_academic":
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.2" />')
+            if top_accent:
+                out.append(f'<rect x="{x}" y="{y}" width="{w}" height="4" rx="2" fill="{self.theme["secondary"]}" />')
+        elif self.archetype == "apple_bento":
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="28" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.5" stroke-opacity="0.85" />')
+            if top_accent:
+                out.append(f'<rect x="{x + 24}" y="{y}" width="{w - 48}" height="2" fill="{self.theme["primary"]}" fill-opacity="0.5" />')
+        elif self.archetype == "royal_gold":
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="1.5" />')
+            out.append(f'<rect x="{x + 6}" y="{y + 6}" width="{w - 12}" height="{h - 12}" rx="12" fill="none" stroke="{self.theme["primary"]}" stroke-width="0.75" stroke-opacity="0.4" />')
+        elif self.archetype == "warm_editorial":
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="22" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.8" />')
+            if top_accent:
+                out.append(f'<rect x="{x + 30}" y="{y}" width="{w - 60}" height="3" rx="1.5" fill="{self.theme["primary"]}" />')
+        else:  # cyber_hud
+            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="{stroke_width}" />')
+            if top_accent:
+                out.append(f'<rect x="{x + 40}" y="{y}" width="{w - 80}" height="5" rx="2.5" fill="{self.theme["primary"]}" />')
+        return out
 
     def _header_svg(self, is_rtl: bool, slide_idx: int = 1) -> str:
         lang = "fa" if is_rtl else "en"
@@ -95,81 +126,171 @@ class SlideRenderer:
         wave_1 = self.theme.get("wave_1", "#0E1E45")
         wave_2 = self.theme.get("wave_2", "#1E1B4B")
         accent = self.theme.get("accent", "#EC4899")
+        font = self.theme.get("font_fa" if is_rtl else "font_en")
 
-        # Multi-layer dynamic background waves and geometric energy lines
-        # Floating Particles & Starbursts
-        particles = []
-        part_base_x = 120 if is_rtl else 1650
-        particle_coords = [
-            (part_base_x, 80, 4.0, 0.6), (part_base_x + 60, 130, 2.5, 0.4),
-            (part_base_x - 50, 170, 3.5, 0.5), (part_base_x + 90, 75, 2.0, 0.3),
-            (part_base_x + 130, 160, 4.5, 0.7), (part_base_x - 90, 115, 3.0, 0.4),
-            (part_base_x + 35, 220, 2.5, 0.35), (part_base_x - 55, 250, 4.0, 0.55),
-            (960, 60, 3.0, 0.4), (910, 105, 2.0, 0.3), (1010, 95, 4.0, 0.5),
-            (240, 880, 3.5, 0.45), (310, 930, 2.2, 0.3), (1680, 870, 3.8, 0.5)
-        ]
-        for px, py, pr, p_op in particle_coords:
-            p_col = primary if pr > 3 else (secondary if pr > 2.5 else accent)
-            particles.append(f'<circle cx="{px}" cy="{py}" r="{pr}" fill="{p_col}" fill-opacity="{p_op}" />')
-        particles_svg = "\n".join(particles)
+        bg_rect = f'<rect width="{self.width}" height="{self.height}" fill="{self.theme["background"]}" />'
+        extra_bg = []
 
-        # Alternating dynamic wave contours based on slide index
-        if slide_idx % 2 == 1:
-            wave_path_1 = f'<path d="M0,720 Q480,580 960,760 T1920,680 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
-            wave_path_2 = f'<path d="M0,840 Q520,740 1080,900 T1920,820 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
-            glow_line = f'<path d="M0,720 Q480,580 960,760 T1920,680" fill="none" stroke="{primary}" stroke-width="3" stroke-opacity="0.45" />'
-        else:
-            wave_path_1 = f'<path d="M0,660 Q560,820 1100,640 T1920,740 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
-            wave_path_2 = f'<path d="M0,800 Q440,920 1020,780 T1920,860 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
-            glow_line = f'<path d="M0,660 Q560,820 1100,640 T1920,740" fill="none" stroke="{secondary}" stroke-width="3" stroke-opacity="0.45" />'
+        if self.archetype == "swiss_academic":
+            # Precision surgical grid lines
+            grid_lines = []
+            for gx in range(240, 1800, 240):
+                grid_lines.append(f'<line x1="{gx}" y1="80" x2="{gx}" y2="1000" stroke="{self.theme["surface_border"]}" stroke-width="0.75" stroke-opacity="0.3" />')
+            for gy in range(180, 960, 180):
+                grid_lines.append(f'<line x1="80" y1="{gy}" x2="1840" y2="{gy}" stroke="{self.theme["surface_border"]}" stroke-width="0.75" stroke-opacity="0.3" />')
+            for gx in (480, 960, 1440):
+                for gy in (360, 720):
+                    grid_lines.append(f'<text x="{gx}" y="{gy+4}" font-family="monospace" font-size="14" fill="{secondary}" fill-opacity="0.5" text-anchor="middle">+</text>')
+            top_rule = f'<line x1="80" y1="140" x2="1840" y2="140" stroke="{secondary}" stroke-width="1.5" stroke-opacity="0.5" />'
+            compass_x = 1800 if is_rtl else 120
+            compass_y = 960
+            compass_svg = f"""
+            <g id="spin_academic_compass">
+                <circle cx="{compass_x}" cy="{compass_y}" r="110" fill="none" stroke="{secondary}" stroke-width="1.2" stroke-dasharray="3 9" stroke-opacity="0.4" />
+                <circle cx="{compass_x}" cy="{compass_y}" r="80" fill="none" stroke="{primary}" stroke-width="1.5" stroke-opacity="0.5" />
+                <line x1="{compass_x-95}" y1="{compass_y}" x2="{compass_x+95}" y2="{compass_y}" stroke="{secondary}" stroke-width="1" stroke-opacity="0.4" />
+                <line x1="{compass_x}" y1="{compass_y-95}" x2="{compass_x}" y2="{compass_y+95}" stroke="{secondary}" stroke-width="1" stroke-opacity="0.4" />
+            </g>
+            """
+            extra_bg.append(f'<g id="academic_grid">{"".join(grid_lines)}{top_rule}</g>')
+            extra_bg.append(compass_svg)
 
-        # Floating geometric rings with orbiting satellites
-        ring_x = 1820 if is_rtl else 100
-        ring_y = 960
-        satellites = []
-        for angle_deg, r_dist, sat_r, sat_c in [(35, 260, 6, primary), (145, 260, 5, secondary), (260, 180, 5.5, accent), (80, 380, 7, primary)]:
-            rad = math.radians(angle_deg)
-            sx = ring_x + (r_dist * math.cos(rad))
-            sy = ring_y + (r_dist * math.sin(rad))
-            satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r}" fill="{sat_c}" />')
-            satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r+5}" fill="none" stroke="{sat_c}" stroke-width="1.5" stroke-opacity="0.4" />')
-        satellites_svg = "\n".join(satellites)
+        elif self.archetype == "neo_brutalist":
+            # Retro Pop Dot Matrix & Rotating Starburst Badge
+            dot_color = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
+            dots = []
+            for dx in range(120, 1820, 120):
+                for dy in range(120, 980, 120):
+                    dots.append(f'<circle cx="{dx}" cy="{dy}" r="2.5" fill="{dot_color}" fill-opacity="0.12" />')
+            dots_svg = "".join(dots)
+            corner_poly = f'<polygon points="0,0 200,0 0,200" fill="{primary}" stroke="{dot_color}" stroke-width="3" />'
+            badge_x = 1760 if is_rtl else 160
+            badge_y = 120
+            badge_svg = f"""
+            <g id="spin_brutalist_badge">
+                <circle cx="{badge_x}" cy="{badge_y}" r="45" fill="{accent}" stroke="{dot_color}" stroke-width="3" />
+                <text x="{badge_x}" y="{badge_y+10}" font-family="{font}" font-size="28" font-weight="900" fill="{self.theme['text_main']}" text-anchor="middle">★</text>
+            </g>
+            """
+            extra_bg.append(f'<g id="brutalist_ambient">{dots_svg}{corner_poly}</g>')
+            extra_bg.append(badge_svg)
 
-        ambient_rings = f"""
-        <circle cx="{ring_x}" cy="{ring_y}" r="260" fill="none" stroke="{primary}" stroke-width="2.5" stroke-opacity="0.3" stroke-dasharray="14 10" />
-        <circle cx="{ring_x}" cy="{ring_y}" r="180" fill="none" stroke="{secondary}" stroke-width="2" stroke-opacity="0.35" stroke-dasharray="8 6" />
-        <circle cx="{ring_x}" cy="{ring_y}" r="380" fill="none" stroke="{accent}" stroke-width="1.2" stroke-opacity="0.2" stroke-dasharray="6 14" />
-        {satellites_svg}
-        """
+        elif self.archetype == "apple_bento":
+            # Ambient Blurred Glow Orbs & Bento Halos
+            orbs = f"""
+            <g id="bento_glow_orbs">
+                <circle cx="280" cy="180" r="280" fill="{primary}" fill-opacity="0.10" />
+                <circle cx="1640" cy="900" r="320" fill="{secondary}" fill-opacity="0.08" />
+                <circle cx="960" cy="540" r="200" fill="{accent}" fill-opacity="0.05" />
+            </g>
+            """
+            halo_x = 1800 if is_rtl else 120
+            halo_y = 960
+            halo_svg = f"""
+            <g id="spin_bento_halo">
+                <circle cx="{halo_x}" cy="{halo_y}" r="220" fill="none" stroke="{primary}" stroke-width="1.2" stroke-dasharray="8 12" stroke-opacity="0.3" />
+                <circle cx="{halo_x}" cy="{halo_y}" r="150" fill="none" stroke="{secondary}" stroke-width="1.8" stroke-dasharray="4 8" stroke-opacity="0.35" />
+                <circle cx="{halo_x + 150}" cy="{halo_y}" r="4" fill="{primary}" />
+            </g>
+            """
+            extra_bg.append(orbs)
+            extra_bg.append(halo_svg)
 
-        # Diagonal geometric corner chips
-        corner_chip = f"""
-        <polygon points="0,0 220,0 0,220" fill="{primary}" fill-opacity="0.08" />
-        <polygon points="1920,0 1700,0 1920,220" fill="{secondary}" fill-opacity="0.08" />
-        """
+        elif self.archetype == "warm_editorial":
+            # Organic flowing wave contours & Botanical Sun
+            w1 = f'<path d="M0,720 C480,620 780,880 1200,760 C1620,640 1780,860 1920,800 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.7" />'
+            w2 = f'<path d="M0,840 C420,760 840,960 1300,850 C1620,770 1820,920 1920,880 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
+            sun_x = 1800 if is_rtl else 120
+            sun_y = 960
+            sun_svg = f"""
+            <g id="spin_botanical_sun">
+                <circle cx="{sun_x}" cy="{sun_y}" r="200" fill="none" stroke="{primary}" stroke-width="1.5" stroke-dasharray="6 10" stroke-opacity="0.35" />
+                <circle cx="{sun_x}" cy="{sun_y}" r="140" fill="none" stroke="{secondary}" stroke-width="2" stroke-dasharray="12 8" stroke-opacity="0.3" />
+                <circle cx="{sun_x}" cy="{sun_y}" r="70" fill="{self.theme['badge_bg']}" stroke="{primary}" stroke-width="1.5" />
+            </g>
+            """
+            extra_bg.append(f'<g id="organic_waves">{w1}{w2}</g>')
+            extra_bg.append(sun_svg)
+
+        elif self.archetype == "royal_gold":
+            # Art-Deco luxury pinstripe frame & Royal Crest
+            pinstripes = f"""
+            <g id="royal_pinstripes">
+                <rect x="36" y="36" width="1848" height="1008" fill="none" stroke="{primary}" stroke-width="1.2" stroke-opacity="0.45" />
+                <rect x="48" y="48" width="1824" height="984" fill="none" stroke="{primary}" stroke-width="0.6" stroke-opacity="0.3" stroke-dasharray="14 10" />
+                <polygon points="36,60 60,36 48,36 36,48" fill="{primary}" />
+                <polygon points="1884,60 1860,36 1872,36 1884,48" fill="{primary}" />
+                <polygon points="36,1020 60,1044 48,1044 36,1032" fill="{primary}" />
+                <polygon points="1884,1020 1860,1044 1872,1044 1884,1032" fill="{primary}" />
+            </g>
+            """
+            crest_x = 1800 if is_rtl else 120
+            crest_y = 960
+            crest_svg = f"""
+            <g id="spin_royal_crest">
+                <circle cx="{crest_x}" cy="{crest_y}" r="210" fill="none" stroke="{primary}" stroke-width="1.5" stroke-dasharray="4 8" stroke-opacity="0.4" />
+                <circle cx="{crest_x}" cy="{crest_y}" r="150" fill="none" stroke="{secondary}" stroke-width="2" stroke-dasharray="12 12" stroke-opacity="0.45" />
+                <polygon points="{crest_x},{crest_y-25} {crest_x+25},{crest_y} {crest_x},{crest_y+25} {crest_x-25},{crest_y}" fill="{primary}" fill-opacity="0.7" />
+            </g>
+            """
+            extra_bg.append(pinstripes)
+            extra_bg.append(crest_svg)
+
+        else:  # cyber_hud
+            particles = []
+            part_base_x = 120 if is_rtl else 1650
+            particle_coords = [
+                (part_base_x, 80, 4.0, 0.6), (part_base_x + 60, 130, 2.5, 0.4),
+                (part_base_x - 50, 170, 3.5, 0.5), (part_base_x + 90, 75, 2.0, 0.3),
+                (part_base_x + 130, 160, 4.5, 0.7), (part_base_x - 90, 115, 3.0, 0.4),
+                (part_base_x + 35, 220, 2.5, 0.35), (part_base_x - 55, 250, 4.0, 0.55),
+                (960, 60, 3.0, 0.4), (910, 105, 2.0, 0.3), (1010, 95, 4.0, 0.5),
+                (240, 880, 3.5, 0.45), (310, 930, 2.2, 0.3), (1680, 870, 3.8, 0.5)
+            ]
+            for px, py, pr, p_op in particle_coords:
+                p_col = primary if pr > 3 else (secondary if pr > 2.5 else accent)
+                particles.append(f'<circle cx="{px}" cy="{py}" r="{pr}" fill="{p_col}" fill-opacity="{p_op}" />')
+            particles_svg = "\n".join(particles)
+
+            if slide_idx % 2 == 1:
+                wave_path_1 = f'<path d="M0,720 Q480,580 960,760 T1920,680 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
+                wave_path_2 = f'<path d="M0,840 Q520,740 1080,900 T1920,820 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
+                glow_line = f'<path d="M0,720 Q480,580 960,760 T1920,680" fill="none" stroke="{primary}" stroke-width="3" stroke-opacity="0.45" />'
+            else:
+                wave_path_1 = f'<path d="M0,660 Q560,820 1100,640 T1920,740 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
+                wave_path_2 = f'<path d="M0,800 Q440,920 1020,780 T1920,860 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
+                glow_line = f'<path d="M0,660 Q560,820 1100,640 T1920,740" fill="none" stroke="{secondary}" stroke-width="3" stroke-opacity="0.45" />'
+
+            ring_x = 1820 if is_rtl else 100
+            ring_y = 960
+            satellites = []
+            for angle_deg, r_dist, sat_r, sat_c in [(35, 260, 6, primary), (145, 260, 5, secondary), (260, 180, 5.5, accent), (80, 380, 7, primary)]:
+                rad = math.radians(angle_deg)
+                sx = ring_x + (r_dist * math.cos(rad))
+                sy = ring_y + (r_dist * math.sin(rad))
+                satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r}" fill="{sat_c}" />')
+                satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r+5}" fill="none" stroke="{sat_c}" stroke-width="1.5" stroke-opacity="0.4" />')
+            satellites_svg = "\n".join(satellites)
+
+            ambient_rings = f"""
+            <circle cx="{ring_x}" cy="{ring_y}" r="260" fill="none" stroke="{primary}" stroke-width="2.5" stroke-opacity="0.3" stroke-dasharray="14 10" />
+            <circle cx="{ring_x}" cy="{ring_y}" r="180" fill="none" stroke="{secondary}" stroke-width="2" stroke-opacity="0.35" stroke-dasharray="8 6" />
+            <circle cx="{ring_x}" cy="{ring_y}" r="380" fill="none" stroke="{accent}" stroke-width="1.2" stroke-opacity="0.2" stroke-dasharray="6 14" />
+            {satellites_svg}
+            """
+            corner_chip = f"""
+            <polygon points="0,0 220,0 0,220" fill="{primary}" fill-opacity="0.08" />
+            <polygon points="1920,0 1700,0 1920,220" fill="{secondary}" fill-opacity="0.08" />
+            """
+            extra_bg.append(f'<g id="ambient_waves">{wave_path_1}{wave_path_2}{glow_line}</g>')
+            extra_bg.append(f'<g id="spin_orbit_rings">{ambient_rings}</g>')
+            extra_bg.append(f'<g id="spin_particle_cluster">{particles_svg}{corner_chip}</g>')
 
         return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {self.width} {self.height}" width="{self.width}" height="{self.height}" lang="{lang}">
-<!-- Deep Base Background -->
-<rect width="{self.width}" height="{self.height}" fill="{self.theme['background']}" />
-
-<!-- Ambient Waves Layer -->
-<g id="ambient_waves">
-    {wave_path_1}
-    {wave_path_2}
-    {glow_line}
-</g>
-
-<!-- Animated Rotating Orbit Rings & Satellites (entrance_spinner) -->
-<g id="spin_orbit_rings">
-    {ambient_rings}
-</g>
-
-<!-- Animated Floating Particle Constellation (entrance_spinner) -->
-<g id="spin_particle_cluster">
-    {particles_svg}
-    {corner_chip}
-</g>
+<!-- Base Background -->
+{bg_rect}
+{"".join(extra_bg)}
 """
 
     def render_title_slide(self, slide: Dict[str, Any], image_rel_path: Optional[str] = None) -> str:
@@ -314,9 +435,8 @@ class SlideRenderer:
             svg.append('</g>')
 
             svg.append(f'<g id="card_{i+1}">')
-            # Heavily Rounded Card Body
-            svg.append(f'<rect x="{c_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="34" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2.5" />')
-            svg.append(f'<rect x="{c_x+40}" y="{card_y}" width="{card_w-80}" height="5" rx="2.5" fill="{self.theme["primary"]}" />')
+            # Style-aware Card Body
+            svg.extend(self._card_rect(c_x, card_y, card_w, card_h, rx=34, stroke_width=2.5))
             # Circular Medallion Disc
             svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r}" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.8" />')
             # Vector Icon Centered in Medallion
@@ -413,9 +533,8 @@ class SlideRenderer:
             # Step Title in Circle Bottom
             svg.append(f'<text x="{center_x}" y="{hub_y + 54}" font-family="{font}" font-size="21" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(s_title)}</text>')
 
-            # Heavily Rounded Capsule Pod for Verbatim Description (rx="32")
-            svg.append(f'<rect x="{pod_x}" y="{pod_y}" width="{step_w}" height="{pod_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
-            svg.append(f'<rect x="{pod_x + 30}" y="{pod_y}" width="{step_w - 60}" height="4" rx="2" fill="{self.theme["primary"]}" />')
+            # Style-aware Capsule Pod for Verbatim Description
+            svg.extend(self._card_rect(pod_x, pod_y, step_w, pod_h, rx=32, stroke_width=2.0))
 
             # Verbatim Description with glowing circular dots
             desc_lines = s_desc.split("\n")
@@ -489,8 +608,8 @@ class SlideRenderer:
                 svg.append('</g>')
 
                 svg.append(f'<g id="kpi_{i+1}">')
-                # Rounded glass card container
-                svg.append(f'<rect x="{stack_x}" y="{ky}" width="{stack_w}" height="{kpi_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
+                # Style-aware glass card container
+                svg.extend(self._card_rect(stack_x, ky, stack_w, kpi_h, rx=32, stroke_width=2.0))
 
                 # Inner circle for dial
                 svg.append(f'<circle cx="{dial_cx}" cy="{dial_cy}" r="54" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2" />')
@@ -547,8 +666,8 @@ class SlideRenderer:
                 svg.append(f'<rect x="{center_x - 90}" y="{dial_y + 115}" width="180" height="42" rx="21" fill="{self.theme["badge_bg"]}" stroke="{self.theme["accent"]}" stroke-width="2" />')
                 svg.append(f'<text x="{center_x}" y="{dial_y + 142}" font-family="{font}" font-size="17" font-weight="700" fill="{self.theme["accent"]}" text-anchor="middle">{escape_xml(trend)}</text>')
 
-                # Heavily Rounded Pod for KPI Label and Verbatim Description (rx="32")
-                svg.append(f'<rect x="{pod_x}" y="{pod_y}" width="{card_w}" height="{pod_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
+                # Style-aware Pod for KPI Label and Verbatim Description
+                svg.extend(self._card_rect(pod_x, pod_y, card_w, pod_h, rx=32, stroke_width=2.0))
                 svg.append(f'<text x="{center_x}" y="{pod_y + 60}" font-family="{font}" font-size="28" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(k_label)}</text>')
 
                 # Verbatim Description Lines
@@ -593,7 +712,11 @@ class SlideRenderer:
 
         # Column A (Muted / Problem / Traditional)
         svg.append('<g id="compare_col_a">')
-        svg.append(f'<rect x="{ca_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="34" fill="{self.theme["surface"]}" stroke="#EF4444" stroke-width="2" stroke-opacity="0.5" />')
+        if self.archetype == "neo_brutalist":
+            svg.append(f'<rect x="{ca_x+8}" y="{card_y+8}" width="{card_w}" height="{card_h}" rx="18" fill="#EF4444" />')
+            svg.append(f'<rect x="{ca_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="18" fill="{self.theme["surface"]}" stroke="#EF4444" stroke-width="3.5" />')
+        else:
+            svg.extend(self._card_rect(ca_x, card_y, card_w, card_h, rx=34, stroke_width=2.5, top_accent=False))
         # Circular Icon Badge
         svg.append(f'<circle cx="{ca_x+70}" cy="{card_y+65}" r="32" fill="{self.theme["background"]}" stroke="#EF4444" stroke-width="2" />')
         svg.append(get_icon_svg_content("x", ca_x + 54, card_y + 49, size=32, stroke_color="#EF4444"))
@@ -611,7 +734,12 @@ class SlideRenderer:
 
         # Column B (Vibrant / Solution / Smart)
         svg.append('<g id="compare_col_b">')
-        svg.append(f'<rect x="{cb_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="34" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
+        if self.archetype == "neo_brutalist":
+            shadow_b = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
+            svg.append(f'<rect x="{cb_x+8}" y="{card_y+8}" width="{card_w}" height="{card_h}" rx="18" fill="{shadow_b}" />')
+            svg.append(f'<rect x="{cb_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="18" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3.5" />')
+        else:
+            svg.extend(self._card_rect(cb_x, card_y, card_w, card_h, rx=34, stroke_width=3.0, top_accent=False))
         # Circular Icon Badge
         svg.append(f'<circle cx="{cb_x+70}" cy="{card_y+65}" r="32" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
         svg.append(get_icon_svg_content("check", cb_x + 54, card_y + 49, size=32, stroke_color=self.theme["primary"]))
@@ -747,8 +875,8 @@ class SlideRenderer:
         svg.append('<g id="bullets_group">')
         curr_y = 260
         for i, bullet in enumerate(bullets):
-            # Heavily Rounded Horizontal Pod (rx="30")
-            svg.append(f'<rect x="{content_x}" y="{curr_y}" width="{content_w}" height="120" rx="30" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
+            # Style-aware Horizontal Pod
+            svg.extend(self._card_rect(content_x, curr_y, content_w, 120, rx=30, stroke_width=2.0, top_accent=False))
             
             # Circular Icon Pod
             circle_x = (content_x + content_w - 65) if rtl else (content_x + 65)
@@ -769,8 +897,13 @@ class SlideRenderer:
 
         # Image Showcase Frame
         svg.append('<g id="hero_image">')
-        svg.append(f'<rect x="{image_x-6}" y="{image_y-6}" width="{image_w+12}" height="{image_h+12}" rx="36" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-opacity="0.35" />')
-        svg.append(f'<rect x="{image_x}" y="{image_y}" width="{image_w}" height="{image_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
+        if self.archetype == "neo_brutalist":
+            shadow_img = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
+            svg.append(f'<rect x="{image_x+8}" y="{image_y+8}" width="{image_w}" height="{image_h}" rx="18" fill="{shadow_img}" />')
+            svg.append(f'<rect x="{image_x}" y="{image_y}" width="{image_w}" height="{image_h}" rx="18" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3.5" />')
+        else:
+            svg.append(f'<rect x="{image_x-6}" y="{image_y-6}" width="{image_w+12}" height="{image_h+12}" rx="36" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-opacity="0.35" />')
+            svg.append(f'<rect x="{image_x}" y="{image_y}" width="{image_w}" height="{image_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
         if image_rel_path:
             svg.append(f'<image href="{image_rel_path}" x="{image_x+10}" y="{image_y+10}" width="{image_w-20}" height="{image_h-20}" preserveAspectRatio="xMidYMid slice" />')
         svg.append('</g>')
@@ -782,8 +915,8 @@ class SlideRenderer:
 def generate_deck_animations_config(project_dir: Path, transition: str = "morph", animation_mode: str = "auto") -> Dict[str, Any]:
     """
     Generate animations.json configuration that assigns infinite continuous motion
-    (emphasis_spin with 999 repetitions) to all particle clusters, orbital rings, and dials,
-    while keeping titles and content on staggered entrance animations.
+    (emphasis_spin with 999 repetitions) to all particle clusters, orbital rings, dials,
+    and archetype-specific badges/compasses, while keeping titles and content on staggered entrance animations.
     """
     from svg_to_pptx.animation_config import scan_project_targets
     targets_by_slide, _ = scan_project_targets(project_dir)
@@ -793,15 +926,19 @@ def generate_deck_animations_config(project_dir: Path, transition: str = "morph"
         for target in targets:
             gid = target.group_id
             if gid.startswith("spin_"):
-                # Harmonious continuous rotational velocity
+                # Harmonious continuous rotational velocity based on archetype geometry
                 if "particle" in gid:
                     dur = 12.0
                 elif "dial" in gid or "vs" in gid:
                     dur = 4.0
-                elif "orbit" in gid or "hero" in gid or "galaxy" in gid:
+                elif "compass" in gid or "royal" in gid:
+                    dur = 16.0
+                elif "badge" in gid:
+                    dur = 6.0
+                elif "sun" in gid or "orbit" in gid or "hero" in gid or "galaxy" in gid or "halo" in gid:
                     dur = 8.0
                 else:
-                    dur = 6.0
+                    dur = 7.0
                 slide_groups[gid] = {
                     "effect": "emphasis_spin",
                     "duration": dur,

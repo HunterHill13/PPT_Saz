@@ -1088,6 +1088,10 @@ _SEMANTIC_PATTERNS: list[tuple[tuple[str, ...], str]] = [
         'entrance_fade',
     ),
     (
+        ('spin', 'rotate', 'wheel', 'orbit', 'particle', 'ring', 'gear', 'dial'),
+        'entrance_spinner',
+    ),
+    (
         ('chart', 'table', 'legend', 'timeline', 'track'),
         'entrance_wipe',
     ),

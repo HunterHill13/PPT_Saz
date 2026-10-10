@@ -2038,7 +2038,10 @@ def create_sequence_timing_xml(
               </p:par>'''
 
     if main_targets:
-        main_sequence_xml = f'''<p:seq concurrent="1" nextAc="seek">
+        has_looping = any(target.repeat_count is None or target.repeat_count > 10 for target in main_targets)
+        has_on_click = any(target.trigger == 'on-click' for target in main_targets)
+        next_ac = 'seek' if (has_on_click and not has_looping) else 'none'
+        main_sequence_xml = f'''<p:seq concurrent="1" nextAc="{next_ac}">
               <p:cTn id="2" dur="indefinite" nodeType="mainSeq">
                 <p:childTnLst>
               {all_steps}

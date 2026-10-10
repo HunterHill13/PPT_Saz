@@ -6,10 +6,11 @@
     "surface_border": "#3A506B",
     "primary": "#48CAE4",
     "secondary": "#00B4D8",
+    "accent": "#F59E0B",
     "text_main": "#F8FAFC",
     "text_muted": "#94A3B8",
-    "accent": "#F59E0B",
-    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "badge_bg": "#16294a",
+    "font_fa": "Yekan Bakh, Vazirmatn, Tahoma, Arial",
     "font_en": "Segoe UI, Inter, sans-serif"
   },
   "modern_dark_indigo": {
@@ -17,12 +18,13 @@
     "background": "#0F0F1A",
     "surface": "#1A1A2E",
     "surface_border": "#2E2A50",
-    "primary": "#8A2BE2",
-    "secondary": "#A855F7",
+    "primary": "#A855F7",
+    "secondary": "#C084FC",
+    "accent": "#EC4899",
     "text_main": "#FFFFFF",
     "text_muted": "#A1A1AA",
-    "accent": "#EC4899",
-    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "badge_bg": "#251b3d",
+    "font_fa": "Yekan Bakh, Vazirmatn, Tahoma, Arial",
     "font_en": "Inter, Segoe UI, sans-serif"
   },
   "clean_academic": {
@@ -32,10 +34,11 @@
     "surface_border": "#E2E8F0",
     "primary": "#1E3A8A",
     "secondary": "#2563EB",
+    "accent": "#D97706",
     "text_main": "#0F172A",
     "text_muted": "#64748B",
-    "accent": "#D97706",
-    "font_fa": "Vazirmatn, B Nazanin, Tahoma",
+    "badge_bg": "#EFF6FF",
+    "font_fa": "Yekan Bakh, Vazirmatn, B Nazanin, Tahoma",
     "font_en": "Calibri, Georgia, Segoe UI"
   },
   "emerald_tech": {
@@ -43,12 +46,13 @@
     "background": "#064E3B",
     "surface": "#065F46",
     "surface_border": "#047857",
-    "primary": "#10B981",
-    "secondary": "#34D399",
+    "primary": "#34D399",
+    "secondary": "#10B981",
+    "accent": "#FBBF24",
     "text_main": "#F0FDF4",
     "text_muted": "#A7F3D0",
-    "accent": "#FBBF24",
-    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "badge_bg": "#064e3b",
+    "font_fa": "Yekan Bakh, Vazirmatn, Tahoma, Arial",
     "font_en": "Segoe UI, Inter, sans-serif"
   },
   "warm_terracotta": {
@@ -56,12 +60,13 @@
     "background": "#1C1917",
     "surface": "#292524",
     "surface_border": "#44403C",
-    "primary": "#F97316",
-    "secondary": "#FB923C",
+    "primary": "#FB923C",
+    "secondary": "#F97316",
+    "accent": "#EAB308",
     "text_main": "#FAF5F0",
     "text_muted": "#A8A29E",
-    "accent": "#EAB308",
-    "font_fa": "Vazirmatn, Tahoma, Arial",
+    "badge_bg": "#33221b",
+    "font_fa": "Yekan Bakh, Vazirmatn, Tahoma, Arial",
     "font_en": "Segoe UI, Inter, sans-serif"
   }
 }

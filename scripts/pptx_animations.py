@@ -421,6 +421,8 @@ class AnimationTarget:
     def playback_duration_ms(self) -> int:
         """Return the wall-clock duration used by after-previous scheduling."""
         one_play = self.duration_ms * (2 if self.auto_reverse else 1)
+        if self.trigger == 'with-previous' or (self.repeat_count is not None and self.repeat_count > 10):
+            return 0
         if self.repeat_duration_ms is not None:
             return self.repeat_duration_ms
         if self.repeat_count is not None:

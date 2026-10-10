@@ -303,23 +303,20 @@ class SlideRenderer:
 
             center_card_x = c_x + (card_w / 2)
 
-            svg.append(f'<g id="card_{i+1}">')
-            # Heavily Rounded Card Body
-            svg.append(f'<rect x="{c_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="34" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2.5" />')
-            svg.append(f'<rect x="{c_x+40}" y="{card_y}" width="{card_w-80}" height="5" rx="2.5" fill="{self.theme["primary"]}" />')
-
-            # Protruding Circular Medallion Crown on top of card
+            # Spinning Dashed Halo around the Crown (top-level continuous motion group)
             crown_cx = center_card_x
             crown_cy = card_y + 45
             crown_r = 52
-
-            # Spinning Dashed Halo around the Crown
             svg.append(f'<g id="spin_card_halo_{i+1}">')
             svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 14}" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-dasharray="6 5" stroke-opacity="0.55" />')
             svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 24}" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1" stroke-dasharray="3 6" stroke-opacity="0.3" />')
             svg.append(f'<circle cx="{crown_cx + crown_r + 14}" cy="{crown_cy}" r="4" fill="{self.theme["accent"]}" />')
             svg.append('</g>')
 
+            svg.append(f'<g id="card_{i+1}">')
+            # Heavily Rounded Card Body
+            svg.append(f'<rect x="{c_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="34" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2.5" />')
+            svg.append(f'<rect x="{c_x+40}" y="{card_y}" width="{card_w-80}" height="5" rx="2.5" fill="{self.theme["primary"]}" />')
             # Circular Medallion Disc
             svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r}" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.8" />')
             # Vector Icon Centered in Medallion
@@ -393,9 +390,7 @@ class SlideRenderer:
 
             pod_x = center_x - (step_w / 2)
 
-            svg.append(f'<g id="step_node_{i+1}">')
-
-            # Spinning Dashed Orbit Rings around the Circular Hub
+            # Spinning Dashed Orbit Rings around the Circular Hub (top-level continuous motion group)
             svg.append(f'<g id="spin_step_orbit_{i+1}">')
             svg.append(f'<circle cx="{center_x}" cy="{hub_y}" r="115" fill="none" stroke="{self.theme["primary"]}" stroke-width="2.5" stroke-dasharray="8 6" stroke-opacity="0.6" />')
             svg.append(f'<circle cx="{center_x}" cy="{hub_y}" r="130" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1.2" stroke-dasharray="4 8" stroke-opacity="0.4" />')
@@ -403,6 +398,7 @@ class SlideRenderer:
             svg.append(f'<circle cx="{center_x - 115}" cy="{hub_y}" r="4.5" fill="{self.theme["primary"]}" />')
             svg.append('</g>')
 
+            svg.append(f'<g id="step_node_{i+1}">')
             # Inner Glass Circular Medallion
             svg.append(f'<circle cx="{center_x}" cy="{hub_y}" r="92" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
 
@@ -482,20 +478,19 @@ class SlideRenderer:
                 k_desc = kpi.get("desc", "")
                 trend = kpi.get("trend", "↑ رشد شاخص")
 
-                svg.append(f'<g id="kpi_{i+1}">')
-                # Rounded glass card container
-                svg.append(f'<rect x="{stack_x}" y="{ky}" width="{stack_w}" height="{kpi_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
-
-                # Circular Dial Accent on one side
                 dial_cx = (stack_x + stack_w - 110) if rtl else (stack_x + 110)
                 dial_cy = ky + (kpi_h / 2)
                 
-                # Spinning Calibration Track
+                # Spinning Calibration Track (top-level continuous motion group)
                 svg.append(f'<g id="spin_kpi_dial_{i+1}">')
                 svg.append(f'<circle cx="{dial_cx}" cy="{dial_cy}" r="78" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1.8" stroke-dasharray="4 6" stroke-opacity="0.5" />')
                 svg.append(f'<circle cx="{dial_cx}" cy="{dial_cy}" r="64" fill="none" stroke="{self.theme["primary"]}" stroke-width="6" stroke-dasharray="260 140" stroke-linecap="round" />')
                 svg.append(f'<circle cx="{dial_cx + 78}" cy="{dial_cy}" r="4" fill="{self.theme["accent"]}" />')
                 svg.append('</g>')
+
+                svg.append(f'<g id="kpi_{i+1}">')
+                # Rounded glass card container
+                svg.append(f'<rect x="{stack_x}" y="{ky}" width="{stack_w}" height="{kpi_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
 
                 # Inner circle for dial
                 svg.append(f'<circle cx="{dial_cx}" cy="{dial_cy}" r="54" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2" />')
@@ -531,9 +526,7 @@ class SlideRenderer:
                 pod_x = center_x - (card_w / 2)
                 pod_h = 390
 
-                svg.append(f'<g id="kpi_node_{i+1}">')
-
-                # Spinning Radial Calibration Gauge & Dial Rings
+                # Spinning Radial Calibration Gauge & Dial Rings (top-level continuous motion group)
                 svg.append(f'<g id="spin_kpi_dial_{i+1}">')
                 svg.append(f'<circle cx="{center_x}" cy="{dial_y}" r="140" fill="none" stroke="{self.theme["secondary"]}" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="5 7" />')
                 svg.append(f'<circle cx="{center_x}" cy="{dial_y}" r="118" fill="none" stroke="{self.theme["surface_border"]}" stroke-width="12" />')
@@ -542,6 +535,7 @@ class SlideRenderer:
                 svg.append(f'<circle cx="{center_x - 140}" cy="{dial_y}" r="5" fill="{self.theme["primary"]}" />')
                 svg.append('</g>')
 
+                svg.append(f'<g id="kpi_node_{i+1}">')
                 # Inner Glass Disc
                 svg.append(f'<circle cx="{center_x}" cy="{dial_y}" r="98" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
 
@@ -785,6 +779,56 @@ class SlideRenderer:
         return "\n".join(svg)
 
 
+def generate_deck_animations_config(project_dir: Path, transition: str = "morph", animation_mode: str = "auto") -> Dict[str, Any]:
+    """
+    Generate animations.json configuration that assigns infinite continuous motion
+    (emphasis_spin with 999 repetitions) to all particle clusters, orbital rings, and dials,
+    while keeping titles and content on staggered entrance animations.
+    """
+    from svg_to_pptx.animation_config import scan_project_targets
+    targets_by_slide, _ = scan_project_targets(project_dir)
+    slides_cfg: Dict[str, Any] = {}
+    for slide_stem, targets in targets_by_slide.items():
+        slide_groups: Dict[str, Any] = {}
+        for target in targets:
+            gid = target.group_id
+            if gid.startswith("spin_"):
+                # Harmonious continuous rotational velocity
+                if "particle" in gid:
+                    dur = 12.0
+                elif "dial" in gid or "vs" in gid:
+                    dur = 4.0
+                elif "orbit" in gid or "hero" in gid or "galaxy" in gid:
+                    dur = 8.0
+                else:
+                    dur = 6.0
+                slide_groups[gid] = {
+                    "effect": "emphasis_spin",
+                    "duration": dur,
+                    "trigger": "with-previous",
+                    "repeat_count": 999
+                }
+        slides_cfg[slide_stem] = {
+            "groups": slide_groups
+        }
+    return {
+        "version": 1,
+        "defaults": {
+            "transition": {
+                "effect": transition,
+                "duration": 0.5
+            },
+            "animation": {
+                "effect": animation_mode,
+                "duration": 0.5,
+                "stagger": 0.35,
+                "trigger": "after-previous"
+            }
+        },
+        "slides": slides_cfg
+    }
+
+
 def generate_presentation_project(
     deck_data: Dict[str, Any],
     project_dir: Path,
@@ -795,7 +839,7 @@ def generate_presentation_project(
 ) -> Path:
     """
     Generate complete SVG deck, notes, and compile to native PPTX with intelligent Morph transitions
-    and spinning particles/orbit elements.
+    and continuous looping particle & orbit animations.
     """
     themes = load_themes()
     theme = themes.get(theme_key, list(themes.values())[0])
@@ -856,6 +900,12 @@ def generate_presentation_project(
         with open(note_file, "w", encoding="utf-8") as f:
             f.write(f"# Notes for Slide {idx}: {slide.get('title', '')}\n\n{notes_content}\n")
 
+    # Write animations.json for infinite continuous particle & orbit motion
+    anim_cfg = generate_deck_animations_config(project_dir, transition=transition, animation_mode=animation_mode)
+    anim_config_path = project_dir / "animations.json"
+    with open(anim_config_path, "w", encoding="utf-8") as f:
+        json.dump(anim_cfg, f, ensure_ascii=False, indent=2)
+
     # Destination PPTX path
     if output_pptx is None:
         deck_title = re.sub(r'[^a-zA-Z0-9_\u0600-\u06FF]', '_', deck_data.get("title", "presentation")).strip("_")
@@ -864,7 +914,7 @@ def generate_presentation_project(
         output_pptx = Path(output_pptx).resolve()
 
     # Compile to native PowerPoint PPTX
-    print(f"Compiling slides to native PPTX with transitions ({transition}) and animations ({animation_mode})...")
+    print(f"Compiling slides to native PPTX with transitions ({transition}) and continuous looping animations ({animation_mode})...")
     from svg_to_pptx import main as svg_main
     orig_argv = sys.argv[:]
     try:

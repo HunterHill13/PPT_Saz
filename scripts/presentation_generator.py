@@ -42,6 +42,12 @@ from archetype_layouts import (
     WarmEditorialRenderer,
     RoyalGoldRenderer,
 )
+from infographic_layouts import InfographicLayoutRenderer
+from semantic_layout_director import orchestrate_deck_layouts
+from custom_template_ingestor import (
+    ingest_custom_pptx_template,
+    upgrade_cloned_slide_svg_with_motion_and_text,
+)
 
 configure_utf8_stdio()
 
@@ -1023,16 +1029,14 @@ def generate_presentation_project(
     output_pptx: Optional[Path] = None,
     theme_key: str = "cyber_aurora",
     transition: str = "morph",
-    animation_mode: str = "auto"
+    animation_mode: str = "auto",
+    custom_template_pptx: Optional[Path] = None,
 ) -> Path:
     """
-    Generate complete SVG deck, notes, and compile to native PPTX with intelligent Morph transitions
-    and continuous looping particle & orbit animations.
+    Generate complete SVG deck, notes, and compile to native PPTX with intelligent Morph transitions,
+    continuous looping particle & orbit animations, semantic anti-repetition layout orchestration,
+    and optional Hybrid Custom PPTX Template ingestion.
     """
-    themes = load_themes()
-    theme = themes.get(theme_key, list(themes.values())[0])
-    renderer = SlideRenderer(theme=theme)
-
     project_dir = project_dir.resolve()
     svg_dir = project_dir / "svg_output"
     notes_dir = project_dir / "notes"
@@ -1044,38 +1048,84 @@ def generate_presentation_project(
     images_dir.mkdir(parents=True, exist_ok=True)
     exports_dir.mkdir(parents=True, exist_ok=True)
 
+    themes = load_themes()
+    theme = themes.get(theme_key, list(themes.values())[0])
+
+    ingested_bundle = None
+    template_path_str = custom_template_pptx or deck_data.get("template_pptx")
+    if template_path_str:
+        ingested_bundle = ingest_custom_pptx_template(Path(template_path_str), project_dir)
+        theme = ingested_bundle.theme
+        print(
+            f"  [Hybrid Custom Template] Extracted Brand DNA from '{ingested_bundle.source_pptx.name}': "
+            f"bg={theme['background']}, primary={theme['primary']}, "
+            f"harvested_icons={len(ingested_bundle.harvested_icons)}, "
+            f"template_slides={len(ingested_bundle.slide_svgs)}"
+        )
+
+    renderer = SlideRenderer(theme=theme)
+
     slides = deck_data.get("slides", [])
     if not slides:
         raise ValueError("No slides found in deck data!")
 
-    print(f"Creating rich, non-minimalist circular & particle presentation with {len(slides)} slides...")
+    # Autonomous Semantic Layout Director + Zero Consecutive Repetition Rhythm Law
+    assigned_layouts = orchestrate_deck_layouts(slides)
+    print(f"Creating presentation with {len(slides)} slides | Assigned Layouts: {assigned_layouts}")
 
     for idx, slide in enumerate(slides, start=1):
         slide_stem = f"{idx:02d}_{slide.get('slug', f'slide_{idx}')}"
-        layout = slide.get("layout", "content_cards")
-        
+        layout = assigned_layouts[idx - 1]
+
         # Sourcing Image
         img_filename = f"img_{idx:02d}.jpg"
         img_rel_for_svg = f"../images/{img_filename}"
         img_query = slide.get("image_query", slide.get("image_prompt", slide.get("title", "presentation")))
 
-        # Render appropriate layout
-        if layout == "title_hero" or idx == 1:
-            img_path = fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
+        # Check if user explicitly requested direct template slide cloning in Hybrid mode
+        clone_idx = slide.get("clone_template_slide")
+        if ingested_bundle and clone_idx is not None and 1 <= int(clone_idx) <= len(ingested_bundle.slide_svgs):
+            raw_svg = ingested_bundle.slide_svgs[int(clone_idx) - 1]
+            new_texts = [slide.get("title", ""), slide.get("kicker", ""), slide.get("subtitle", "")]
+            svg_content = upgrade_cloned_slide_svg_with_motion_and_text(raw_svg, [t for t in new_texts if t], theme["primary"])
+        elif layout == "title_hero" or idx == 1:
+            fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
             svg_content = renderer.render_title_slide(slide, image_rel_path=img_rel_for_svg)
         elif layout == "process_steps":
             svg_content = renderer.render_process_steps_slide(slide, slide_idx=idx)
         elif layout == "stats_kpi":
-            img_path = fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
+            fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
             svg_content = renderer.render_stats_kpi_slide(slide, image_rel_path=img_rel_for_svg, slide_idx=idx)
         elif layout == "comparison":
             svg_content = renderer.render_comparison_slide(slide, slide_idx=idx)
         elif layout == "circular_orbit":
             svg_content = renderer.render_circular_orbit_slide(slide, slide_idx=idx)
         elif layout == "split_image":
-            img_path = fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
+            fetch_or_create_placeholder(img_query, images_dir, img_filename, theme=deck_data.get("theme_category", "technology"))
             svg_content = renderer.render_split_image_slide(slide, image_rel_path=img_rel_for_svg, slide_idx=idx)
-        else: # default content_cards
+        elif layout == "pyramid_hierarchy":
+            svg_content = InfographicLayoutRenderer.render_pyramid_hierarchy(renderer, slide, slide_idx=idx)
+        elif layout == "funnel_pipeline":
+            svg_content = InfographicLayoutRenderer.render_funnel_pipeline(renderer, slide, slide_idx=idx)
+        elif layout == "venn_synergy":
+            svg_content = InfographicLayoutRenderer.render_venn_synergy(renderer, slide, slide_idx=idx)
+        elif layout == "quadrant_matrix_2x2":
+            svg_content = InfographicLayoutRenderer.render_quadrant_matrix_2x2(renderer, slide, slide_idx=idx)
+        elif layout == "snake_roadmap":
+            svg_content = InfographicLayoutRenderer.render_snake_roadmap(renderer, slide, slide_idx=idx)
+        elif layout == "mind_map_hub":
+            svg_content = InfographicLayoutRenderer.render_mind_map_hub(renderer, slide, slide_idx=idx)
+        elif layout == "fishbone_cause_effect":
+            svg_content = InfographicLayoutRenderer.render_fishbone_cause_effect(renderer, slide, slide_idx=idx)
+        elif layout == "data_chart_showcase":
+            svg_content = InfographicLayoutRenderer.render_data_chart_showcase(renderer, slide, slide_idx=idx)
+        elif layout == "smart_table_matrix":
+            svg_content = InfographicLayoutRenderer.render_smart_table_matrix(renderer, slide, slide_idx=idx)
+        elif layout == "hero_callout_quote":
+            svg_content = InfographicLayoutRenderer.render_hero_callout_quote(renderer, slide, slide_idx=idx)
+        elif layout == "closing_thankyou":
+            svg_content = InfographicLayoutRenderer.render_closing_thankyou(renderer, slide, slide_idx=idx)
+        else:  # default content_cards
             svg_content = renderer.render_content_cards_slide(slide, slide_idx=idx)
 
         svg_file = svg_dir / f"{slide_stem}.svg"
@@ -1162,11 +1212,12 @@ def fetch_or_create_placeholder(query: str, images_dir: Path, filename: str, the
 
 
 def main():
-    parser = argparse.ArgumentParser(description="PPT Master - Native Presentation Generator v3.1")
+    parser = argparse.ArgumentParser(description="PPT Master / PPT_Saz v5.0 - Next-Gen Presentation Generator")
     parser.add_argument("deck_json", type=Path, help="Path to input presentation JSON specification")
     parser.add_argument("-p", "--project-dir", type=Path, default=Path("project_run"), help="Project directory")
     parser.add_argument("-o", "--output", type=Path, default=None, help="Output PPTX path")
     parser.add_argument("--theme", type=str, default="cyber_aurora", help="Theme key")
+    parser.add_argument("--template-pptx", type=Path, default=None, help="Optional path to custom .pptx template for Hybrid DNA & slide ingestion")
     parser.add_argument("-t", "--transition", type=str, default="morph", help="Transition effect (default: morph)")
     parser.add_argument("-a", "--animation", type=str, default="auto", help="Animation mode (default: auto)")
 
@@ -1181,7 +1232,8 @@ def main():
         output_pptx=args.output,
         theme_key=args.theme,
         transition=args.transition,
-        animation_mode=args.animation
+        animation_mode=args.animation,
+        custom_template_pptx=args.template_pptx,
     )
     print(f"Done: {out_file}")
 

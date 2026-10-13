@@ -1,36 +1,35 @@
 ---
 name: ppt-saz
 description: >
-  AI Presentation Director & Native PowerPoint (PPTX) Generator (v5.5) with 9 Polymorphic Art-Style Visual Skins
-  (Cyber HUD, Swiss Academic, Neo-Brutalist Retro OS, Apple Bento-Grid, Warm Botanical Roman Arch, Royal Gold Noir,
-  Bauhaus Weimar 1923 Color-Block, Memphis Paper Cutout Collage, and Architectural CAD Blueprint Schematic),
-  22 light/dark themes, 18 specialized slide & infographic diagram layouts (Pyramid, Funnel, Venn, 2x2 Quadrant SWOT,
-  Snake Roadmap, Mind-Map, Fishbone, Vector Radar Charts, Smart Tables), Autonomous Semantic Anti-Repetition Layout Director,
-  Hybrid Custom .pptx Template & Icon Ingestion (--template-pptx), 5000+ vector icons, single-click Morph transitions,
-  continuous looping particle & orbit animations, and native bilingual (Persian RTL with Yekan Bakh / English LTR) typography.
+  AI Presentation Director & Native PowerPoint (PPTX) Generator (v6.0) with 4 Multi-Dimensional Rendering Paradigms
+  (2.5D Isometric World, 3D Volumetric Claymorphism Studio, Photorealistic Textured Art, and 2D Technical Blueprint),
+  9 Polymorphic Art-Style Visual Skins, 22 light/dark themes, 18 specialized infographic diagram layouts (3D Pyramid,
+  Volumetric Funnel, Translucent Venn, 2x2 Quadrant SWOT, Serpentine Roadmap, Mind-Map, Fishbone, Radar Charts, Smart Tables),
+  Autonomous Semantic Anti-Repetition Layout Director, Hybrid Custom .pptx Template Ingestion, 5000+ vector icons,
+  Morph transitions, continuous looping particle & orbit animations, and native bilingual (Persian RTL with Yekan Bakh / English LTR) typography.
   Use when the user asks to create, design, generate, or beautify PowerPoint presentations (.pptx),
   use a custom .pptx template, turn text/notes into slides, or mentions "پاورپوینت", "اسلاید", "presentation", "PPT", or "PPT_Saz".
 ---
 
-# اسکیل ساخت خودکار و نیتیو پاورپوینت (`PPT_Saz v5.5` — Polymorphic 9-Art-Style & Infographic Studio)
+# اسکیل ساخت خودکار و نیتیو پاورپوینت (`PPT_Saz v6.0` — Multi-Dimensional 2.5D, 3D & Photorealistic Studio)
 
-این اسکیل بر پایه یافته‌های مقالات علمی روز (**PPTAgent** در EMNLP، **AutoPresent** در CVPR و **DOC2PPT** در AAAI) و موتور **پوسته بصری چندریختی (`ArtStyleSkinEngine`)** طراحی شده است؛ به‌طوری که هر کدام از **۹ آرت‌استایل**، شکل هندسیِ **هر ۵ المان پایه (کادرها، هدرها، قاب آیکون‌ها، اسلاید کاور و بوم پس‌زمینه)** را در دلِ تمام **۱۸ ساختار و دیاگرام** به‌طور کامل دگرگون می‌کنند.
+این اسکیل مجهز به **موتور رندرینگ چندبُعدی (`ArtStyleSkinEngine v6.0`)** است که پرزنتیشن‌ها را از حالت «تغییر رنگ اشکال فلت دو بعدی» خارج کرده و در **۴ پارادایم رندرینگ کاملاً متمایز** تولید می‌کند:
+1. **دنیای ۲.۵ بعدی ایزومتریک (2.5D Isometric World):** بلوک‌ها و سکوهای چندسطحی اکسترودشده با محاسبه زوایای ۳۰ درجه، وجه بالایی روشن (`+۲۲٪` روشنایی)، دیواره‌های ضخامت جانبی (`-۳۸٪` سایه)، سایه‌افکنی مورب بر بستر زمین و آیکون‌های مکعبی ایزومتریک ۳ بعدی.
+2. **استودیوی ۳ بعدی حجمی و کلی‌مورفیسم (3D Volumetric & Claymorphism):** گرادینت‌های نوری چندمرحله‌ای فونگ، کپسول‌ها و بالشتک‌های حجم‌دار نرم، کره‌های شیشه‌ای و پلاستیکی سه‌بعدی با هایلایت سافت‌باکس استودیو و سایه‌های نرم عمیق محیطی.
+3. **آرت فوتورئالیستیک و متریال واقعی (Photorealistic Material Art):** پس‌زمینه‌های بافت ارگانیک (سنگ مرمر سیاه ایتالیایی نرو مارکینا با رگه‌های طلا، کتان ژورنالی دست‌ساز با نورپردازی کیاروسکورو)، کارت‌های شیشه‌ای مات فِراستد و کادرهای شمش طلای پخ‌خورده سه‌بعدی.
+4. **دقت فنی و مهندسی ۲ بعدی (2D Technical Blueprint & Constructivist):** خطوط مهندسی دقیق سیانوتایپ CAD، اندازه‌گذاری میکرومتری، گرید تایپوگرافی سوئیسی و پنجره‌های سیستم‌عامل رترو برای ایجاد کنتراست آگاهانه نسبت به سبک‌های سه‌بعدی.
 
 ---
 
-## 🎨 ۹ کهن‌الگوی آرت‌استایل چندریختی و ۲۲ تم رنگی اختصاصی
+## 🎨 ماتریس ۴ پارادایم رندرینگ و ۹ کهن‌الگوی آرت‌استایل چندریختی
 
-| # | کهن‌الگو (Art-Style) | تم روشن (Light) | تم تیره (Dark) | هندسه کادر، هدر و قاب آیکون منحصربه‌فرد (`ArtStyleSkinEngine`) |
-|---|---|---|---|---|
-| **۱** | **Neo-Brutalist Retro OS** | `neo_brutalist_light` | `neo_brutalist_dark` | پنجره سیستم‌عامل رترو با ۳ دکمه `🔴🟡🟢`، گوشه تیز (`rx=0`)، سایه سخت ۱۰px مشکی، هدر استیکر کج |
-| **۲** | **Bauhaus Weimar 1923** | `bauhaus_weimar_light` | `bauhaus_construct_dark` | بلوک‌های هندسی کانستراکتیویسم (قرمز/زرد/آبی)، برش ربع‌دایره، هدر با اشکال `■ ▲ ●` و موبایل چرخان |
-| **۳** | **Paper Cutout Memphis** | `paper_cutout_pop` | `paper_cutout_dark` | کلاژ کاغذ رنگی برش‌خورده چندضلعی، چسب نواری بالای کارت‌ها (`Masking Tape`)، خط زیگزاگ و فرفره چرخان |
-| **۴** | **Blueprint CAD Schematic** | `blueprint_arch_light` | `blueprint_cad_dark` | نقشه مهندسی سیانوتایپ، خطوط امتدادیافته از گوشه‌ها، مهر فنی `CAD // WxH` و کولیس چرخان |
-| **۵** | **Cyber HUD Telemetry** | `cyber_light` | `cyber_aurora` | چندضلعی برش‌خورده ۴۵ درجه (`Chamfered Polygon`)، براکت‌های هدف‌گیری `[ ]`، آیکون شش‌ضلعی و رادار |
-| **۶** | **Royal Gold Art-Deco** | `royal_gold_light` | `royal_gold_dark` | هشت‌ضلعی جواهری پخ‌خورده با قاب دوبل طلایی، هدر وسط‌چین با بال‌های متقارن و نشان ستاره ۸ پر `◆` |
-| **۷** | **Warm Editorial Arch** | `warm_editorial_light` | `warm_editorial_dark` | طاق معماری رومی (`Roman Arch Silhouette`)، سرصفحه مجله‌ای دولایه و مدالیون گیاهی |
-| **۸** | **Swiss Academic Grid** | `swiss_academic_light` | `swiss_academic_dark` | ورق تیز مهندسی (`rx=0`) با علامت‌های ثبت چهارراه `+` در ۴ گوشه، گرید میلی‌متری و قطب‌نمای علمی |
-| **۹** | **Apple Bento Squircle** | `bento_glass_light` | `bento_glass_dark` | اسکوئیرکل شیشه‌ای (`rx=36`) با بازتاب نور بالایی، هدر `Dynamic Island` اپل و آیکون اپ iOS |
+| پارادایم بُعد و رندرینگ | کهن‌الگوهای مرتبط | ویژگی‌های ساختاری و فیزیک نور |
+|---|---|---|
+| **۱. ۲.۵ بعدی ایزومتریک** | `cyber_hud`، `bauhaus_modern` | ۳ وجه مجزا برای هر کادر و نمودار، شبکه ۳۰ درجه کف، برج ایزومتریک کاور، مکعب‌های شناور |
+| **۲. ۳ بعدی حجمی (Claymorphism)** | `apple_bento`، `paper_cutout` | کادرهای اسکوئیرکل بادکرده با نوار بازتاب بالایی، دهانه استوانه‌ای قیف، کره‌های ۳ بعدی، سایه نرم عمیق |
+| **۳. فوتورئالیستیک با متریال واقعی** | `royal_gold`، `warm_editorial` | بافت سنگ مرمر واقعی، کتان کرکی، کادرهای شمش طلای لبه‌دار ۳ بعدی، شیشه‌مورفیسم دودی مات |
+| **۴. دو بعدی سازه‌ای و مهندسی** | `blueprint_schematic`، `swiss_academic`، `neo_brutalist` | خطوط برداری تیز بدون faux-3D، کادر پنجره رترو با سایه ۱۰px تخت، خطوط اندازه‌گذاری CAD |
+
 
 ---
 

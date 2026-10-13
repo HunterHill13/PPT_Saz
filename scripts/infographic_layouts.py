@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from icon_mapper import get_icon_svg_content
+from art_style_skins import _shade_color
 
 
 def is_persian(text: str) -> bool:
@@ -133,14 +134,30 @@ class InfographicLayoutRenderer:
             w2_bot = 50 + ((i + 1) / count) * max_half_w
             col = colors[i % len(colors)]
 
-            pts = f"{pyr_cx - w1_top},{y1} {pyr_cx + w1_top},{y1} {pyr_cx + w2_bot},{y2} {pyr_cx - w2_bot},{y2}"
+            # 2.5D Isometric & 3D Volumetric Extrusion for Pyramid Tiers!
+            iso_dx = 28.0
+            iso_dy = 14.0
+
+            # 1) Cast Floor Drop-Shadow under each tier
             svg.append(f'<g id="pyramid_tier_{i+1}">')
-            svg.append(f'<polygon points="{pts}" fill="{renderer.theme["surface"]}" stroke="{col}" stroke-width="3" />')
-            svg.append(f'<polygon points="{pts}" fill="{col}" fill-opacity="0.18" />')
+            sh_pts = f"{pyr_cx - w1_top + iso_dx},{y1 + iso_dy + 8} {pyr_cx + w1_top + iso_dx},{y1 + iso_dy + 8} {pyr_cx + w2_bot + iso_dx},{y2 + iso_dy + 8} {pyr_cx - w2_bot + iso_dx},{y2 + iso_dy + 8}"
+            svg.append(f'<polygon points="{sh_pts}" fill="#000000" fill-opacity="0.32" />')
+
+            # 2) Right 3D Thickness Wall (Shaded Darker)
+            rw_pts = f"{pyr_cx + w1_top},{y1} {pyr_cx + w1_top + iso_dx},{y1 + iso_dy} {pyr_cx + w2_bot + iso_dx},{y2 + iso_dy} {pyr_cx + w2_bot},{y2}"
+            svg.append(f'<polygon points="{rw_pts}" fill="{_shade_color(col, -0.38)}" stroke="{col}" stroke-width="1.8" />')
+
+            # 3) Front/Top Lit Face of the Pyramid Tier (Using Volumetric Gradients)
+            pts = f"{pyr_cx - w1_top},{y1} {pyr_cx + w1_top},{y1} {pyr_cx + w2_bot},{y2} {pyr_cx - w2_bot},{y2}"
+            grad_id = "grad_3d_primary" if col == renderer.theme["primary"] else ("grad_3d_secondary" if col == renderer.theme["secondary"] else "grad_3d_accent")
+            svg.append(f'<polygon points="{pts}" fill="url(#{grad_id})" stroke="{_shade_color(col, 0.35)}" stroke-width="2.5" />')
+
+            # Specular top rim shine line
+            svg.append(f'<line x1="{pyr_cx - w1_top + 4}" y1="{y1 + 3}" x2="{pyr_cx + w1_top - 4}" y2="{y1 + 3}" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.5" />')
 
             num_str = to_persian_digits(f"0{i+1}") if rtl else f"0{i+1}"
             mid_y = (y1 + y2) / 2
-            svg.append(f'<text x="{pyr_cx}" y="{mid_y + 10}" font-family="{font}" font-size="28" font-weight="900" fill="{col}" text-anchor="middle">{num_str}</text>')
+            svg.append(f'<text x="{pyr_cx}" y="{mid_y + 10}" font-family="{font}" font-size="28" font-weight="900" fill="#FFFFFF" text-anchor="middle">{num_str}</text>')
 
             # Connected Side Callout Card for Verbatim Text
             card_w = 820
@@ -205,14 +222,27 @@ class InfographicLayoutRenderer:
             w2 = max_w - ((i + 1) / count) * (max_w - min_w)
             col = colors[i % len(colors)]
 
-            pts = f"{fun_cx - w1},{y1} {fun_cx + w1},{y1} {fun_cx + w2},{y2} {fun_cx - w2},{y2}"
+            # 3D Volumetric Conical Frustum Segment with Curved Elliptical Caps
+            grad_id = "grad_3d_primary" if col == renderer.theme["primary"] else ("grad_3d_secondary" if col == renderer.theme["secondary"] else "grad_3d_accent")
             svg.append(f'<g id="funnel_stage_{i+1}">')
-            svg.append(f'<polygon points="{pts}" fill="{renderer.theme["surface"]}" stroke="{col}" stroke-width="3" />')
-            svg.append(f'<polygon points="{pts}" fill="{col}" fill-opacity="0.22" />')
+
+            # 1) Cast soft shadow under stage
+            svg.append(f'<ellipse cx="{fun_cx}" cy="{y2 + 8}" rx="{w2 * 0.95}" ry="18" fill="#000000" fill-opacity="0.28" />')
+
+            # 2) 3D Volumetric Funnel Body (Trapezoid with Volumetric Studio Gradient)
+            pts = f"{fun_cx - w1},{y1} {fun_cx + w1},{y1} {fun_cx + w2},{y2} {fun_cx - w2},{y2}"
+            svg.append(f'<polygon points="{pts}" fill="url(#{grad_id})" stroke="{_shade_color(col, 0.35)}" stroke-width="2" />')
+
+            # 3) 3D Curved Top Elliptical Rim (Simulates true cylinder/funnel mouth depth)
+            svg.append(f'<ellipse cx="{fun_cx}" cy="{y1}" rx="{w1}" ry="16" fill="{_shade_color(col, 0.40)}" stroke="{col}" stroke-width="2" />')
+            svg.append(f'<ellipse cx="{fun_cx}" cy="{y1}" rx="{w1 * 0.85}" ry="11" fill="{renderer.theme["surface"]}" stroke="{col}" stroke-width="1.2" />')
+
+            # 4) Front specular shine line down center of the funnel
+            svg.append(f'<line x1="{fun_cx - 15}" y1="{y1 + 10}" x2="{fun_cx - 8}" y2="{y2 - 6}" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.45" />')
 
             mid_y = (y1 + y2) / 2
             stage_num = to_persian_digits(f"مرحله {i+1}") if rtl else f"STAGE 0{i+1}"
-            svg.append(f'<text x="{fun_cx}" y="{mid_y + 8}" font-family="{font}" font-size="22" font-weight="800" fill="{renderer.theme["text_main"]}" text-anchor="middle">{stage_num}</text>')
+            svg.append(f'<text x="{fun_cx}" y="{mid_y + 8}" font-family="{font}" font-size="22" font-weight="900" fill="#FFFFFF" text-anchor="middle">{stage_num}</text>')
 
             # Connected Detail Pod
             card_w = 880
@@ -268,15 +298,21 @@ class InfographicLayoutRenderer:
         svg.append(f'<circle cx="{cx - 295}" cy="{cy}" r="6" fill="{renderer.theme["secondary"]}" />')
         svg.append('</g>')
 
-        # 3 Intersecting Translucent Circles
+        # 3 Intersecting 3D Volumetric Synergy Rings with Specular Lighting
         svg.append('<g id="venn_circles_group">')
         for idx, (vx, vy, col) in enumerate(offsets):
-            svg.append(f'<circle cx="{vx}" cy="{vy}" r="{r_venn}" fill="{col}" fill-opacity="0.18" stroke="{col}" stroke-width="3" />')
+            grad_id = "grad_3d_primary" if col == renderer.theme["primary"] else ("grad_3d_secondary" if col == renderer.theme["secondary"] else "grad_3d_accent")
+            # Soft 3D drop-shadow under each circle
+            svg.append(f'<circle cx="{vx}" cy="{vy + 10}" r="{r_venn}" fill="#000000" fill-opacity="0.25" />')
+            # 3D Translucent Volumetric Circle
+            svg.append(f'<circle cx="{vx}" cy="{vy}" r="{r_venn}" fill="url(#{grad_id})" fill-opacity="0.32" stroke="{col}" stroke-width="3" />')
+            # Specular arc highlight at top of circle
+            svg.append(f'<path d="M {vx - r_venn * 0.7},{vy - r_venn * 0.6} A {r_venn},{r_venn} 0 0,1 {vx + r_venn * 0.7},{vy - r_venn * 0.6}" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-opacity="0.5" />')
             label_y = (vy - 55) if idx == 0 else (vy + 45)
-            svg.append(f'<text x="{vx}" y="{label_y}" font-family="{font}" font-size="22" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(items[idx]["title"][:22])}</text>')
+            svg.append(f'<text x="{vx}" y="{label_y}" font-family="{font}" font-size="22" font-weight="800" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(items[idx]["title"][:22])}</text>')
 
-        # Central Intersection Nucleus
-        svg.extend(renderer._render_icon_badge(cx, cy + 15, 46, renderer.theme["primary"], "sparkles", icon_size=40))
+        # Central Intersection Nucleus (3D Specular Centerpiece Sphere)
+        svg.extend(renderer._render_icon_badge(cx, cy + 15, 48, renderer.theme["primary"], "sparkles", icon_size=42))
         svg.append('</g>')
 
         # 3 Perimeter Verbatim Cards

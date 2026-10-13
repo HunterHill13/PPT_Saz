@@ -130,6 +130,14 @@ class SlideRenderer:
         bg_rect = f'<rect width="{self.width}" height="{self.height}" fill="{self.theme["background"]}" />'
         extra_bg = []
 
+        # Inject Style-specific Gradients, Specular Radial Orbs, & 3D Drop-Shadow Defs
+        defs_svg = ArtStyleSkinEngine.render_style_defs(self)
+
+        # Ambient world canvas according to Dimensional Paradigm
+        ambient_elements = ArtStyleSkinEngine.render_ambient_canvas(self, is_rtl, slide_idx=slide_idx)
+        if ambient_elements:
+            extra_bg.extend(ambient_elements)
+
         if self.archetype == "swiss_academic":
             # Precision surgical grid lines
             grid_lines = []
@@ -174,122 +182,9 @@ class SlideRenderer:
             extra_bg.append(f'<g id="brutalist_ambient">{dots_svg}{corner_poly}</g>')
             extra_bg.append(badge_svg)
 
-        elif self.archetype == "apple_bento":
-            # Ambient Blurred Glow Orbs & Bento Halos
-            orbs = f"""
-            <g id="bento_glow_orbs">
-                <circle cx="280" cy="180" r="280" fill="{primary}" fill-opacity="0.10" />
-                <circle cx="1640" cy="900" r="320" fill="{secondary}" fill-opacity="0.08" />
-                <circle cx="960" cy="540" r="200" fill="{accent}" fill-opacity="0.05" />
-            </g>
-            """
-            halo_x = 1800 if is_rtl else 120
-            halo_y = 960
-            halo_svg = f"""
-            <g id="spin_bento_halo">
-                <circle cx="{halo_x}" cy="{halo_y}" r="220" fill="none" stroke="{primary}" stroke-width="1.2" stroke-dasharray="8 12" stroke-opacity="0.3" />
-                <circle cx="{halo_x}" cy="{halo_y}" r="150" fill="none" stroke="{secondary}" stroke-width="1.8" stroke-dasharray="4 8" stroke-opacity="0.35" />
-                <circle cx="{halo_x + 150}" cy="{halo_y}" r="4" fill="{primary}" />
-            </g>
-            """
-            extra_bg.append(orbs)
-            extra_bg.append(halo_svg)
-
-        elif self.archetype == "warm_editorial":
-            # Organic flowing wave contours & Botanical Sun
-            w1 = f'<path d="M0,720 C480,620 780,880 1200,760 C1620,640 1780,860 1920,800 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.7" />'
-            w2 = f'<path d="M0,840 C420,760 840,960 1300,850 C1620,770 1820,920 1920,880 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
-            sun_x = 1800 if is_rtl else 120
-            sun_y = 960
-            sun_svg = f"""
-            <g id="spin_botanical_sun">
-                <circle cx="{sun_x}" cy="{sun_y}" r="200" fill="none" stroke="{primary}" stroke-width="1.5" stroke-dasharray="6 10" stroke-opacity="0.35" />
-                <circle cx="{sun_x}" cy="{sun_y}" r="140" fill="none" stroke="{secondary}" stroke-width="2" stroke-dasharray="12 8" stroke-opacity="0.3" />
-                <circle cx="{sun_x}" cy="{sun_y}" r="70" fill="{self.theme['badge_bg']}" stroke="{primary}" stroke-width="1.5" />
-            </g>
-            """
-            extra_bg.append(f'<g id="organic_waves">{w1}{w2}</g>')
-            extra_bg.append(sun_svg)
-
-        elif self.archetype == "royal_gold":
-            # Art-Deco luxury pinstripe frame & Royal Crest
-            pinstripes = f"""
-            <g id="royal_pinstripes">
-                <rect x="36" y="36" width="1848" height="1008" fill="none" stroke="{primary}" stroke-width="1.2" stroke-opacity="0.45" />
-                <rect x="48" y="48" width="1824" height="984" fill="none" stroke="{primary}" stroke-width="0.6" stroke-opacity="0.3" stroke-dasharray="14 10" />
-                <polygon points="36,60 60,36 48,36 36,48" fill="{primary}" />
-                <polygon points="1884,60 1860,36 1872,36 1884,48" fill="{primary}" />
-                <polygon points="36,1020 60,1044 48,1044 36,1032" fill="{primary}" />
-                <polygon points="1884,1020 1860,1044 1872,1044 1884,1032" fill="{primary}" />
-            </g>
-            """
-            crest_x = 1800 if is_rtl else 120
-            crest_y = 960
-            crest_svg = f"""
-            <g id="spin_royal_crest">
-                <circle cx="{crest_x}" cy="{crest_y}" r="210" fill="none" stroke="{primary}" stroke-width="1.5" stroke-dasharray="4 8" stroke-opacity="0.4" />
-                <circle cx="{crest_x}" cy="{crest_y}" r="150" fill="none" stroke="{secondary}" stroke-width="2" stroke-dasharray="12 12" stroke-opacity="0.45" />
-                <polygon points="{crest_x},{crest_y-25} {crest_x+25},{crest_y} {crest_x},{crest_y+25} {crest_x-25},{crest_y}" fill="{primary}" fill-opacity="0.7" />
-            </g>
-            """
-            extra_bg.append(pinstripes)
-            extra_bg.append(crest_svg)
-
-        elif self.archetype in ("bauhaus_modern", "paper_cutout", "blueprint_schematic"):
-            extra_bg.extend(ArtStyleSkinEngine.render_ambient_canvas(self, is_rtl, slide_idx=slide_idx))
-
-        else:  # cyber_hud
-            particles = []
-            part_base_x = 120 if is_rtl else 1650
-            particle_coords = [
-                (part_base_x, 80, 4.0, 0.6), (part_base_x + 60, 130, 2.5, 0.4),
-                (part_base_x - 50, 170, 3.5, 0.5), (part_base_x + 90, 75, 2.0, 0.3),
-                (part_base_x + 130, 160, 4.5, 0.7), (part_base_x - 90, 115, 3.0, 0.4),
-                (part_base_x + 35, 220, 2.5, 0.35), (part_base_x - 55, 250, 4.0, 0.55),
-                (960, 60, 3.0, 0.4), (910, 105, 2.0, 0.3), (1010, 95, 4.0, 0.5),
-                (240, 880, 3.5, 0.45), (310, 930, 2.2, 0.3), (1680, 870, 3.8, 0.5)
-            ]
-            for px, py, pr, p_op in particle_coords:
-                p_col = primary if pr > 3 else (secondary if pr > 2.5 else accent)
-                particles.append(f'<circle cx="{px}" cy="{py}" r="{pr}" fill="{p_col}" fill-opacity="{p_op}" />')
-            particles_svg = "\n".join(particles)
-
-            if slide_idx % 2 == 1:
-                wave_path_1 = f'<path d="M0,720 Q480,580 960,760 T1920,680 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
-                wave_path_2 = f'<path d="M0,840 Q520,740 1080,900 T1920,820 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
-                glow_line = f'<path d="M0,720 Q480,580 960,760 T1920,680" fill="none" stroke="{primary}" stroke-width="3" stroke-opacity="0.45" />'
-            else:
-                wave_path_1 = f'<path d="M0,660 Q560,820 1100,640 T1920,740 L1920,1080 L0,1080 Z" fill="{wave_1}" fill-opacity="0.6" />'
-                wave_path_2 = f'<path d="M0,800 Q440,920 1020,780 T1920,860 L1920,1080 L0,1080 Z" fill="{wave_2}" fill-opacity="0.85" />'
-                glow_line = f'<path d="M0,660 Q560,820 1100,640 T1920,740" fill="none" stroke="{secondary}" stroke-width="3" stroke-opacity="0.45" />'
-
-            ring_x = 1820 if is_rtl else 100
-            ring_y = 960
-            satellites = []
-            for angle_deg, r_dist, sat_r, sat_c in [(35, 260, 6, primary), (145, 260, 5, secondary), (260, 180, 5.5, accent), (80, 380, 7, primary)]:
-                rad = math.radians(angle_deg)
-                sx = ring_x + (r_dist * math.cos(rad))
-                sy = ring_y + (r_dist * math.sin(rad))
-                satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r}" fill="{sat_c}" />')
-                satellites.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="{sat_r+5}" fill="none" stroke="{sat_c}" stroke-width="1.5" stroke-opacity="0.4" />')
-            satellites_svg = "\n".join(satellites)
-
-            ambient_rings = f"""
-            <circle cx="{ring_x}" cy="{ring_y}" r="260" fill="none" stroke="{primary}" stroke-width="2.5" stroke-opacity="0.3" stroke-dasharray="14 10" />
-            <circle cx="{ring_x}" cy="{ring_y}" r="180" fill="none" stroke="{secondary}" stroke-width="2" stroke-opacity="0.35" stroke-dasharray="8 6" />
-            <circle cx="{ring_x}" cy="{ring_y}" r="380" fill="none" stroke="{accent}" stroke-width="1.2" stroke-opacity="0.2" stroke-dasharray="6 14" />
-            {satellites_svg}
-            """
-            corner_chip = f"""
-            <polygon points="0,0 220,0 0,220" fill="{primary}" fill-opacity="0.08" />
-            <polygon points="1920,0 1700,0 1920,220" fill="{secondary}" fill-opacity="0.08" />
-            """
-            extra_bg.append(f'<g id="ambient_waves">{wave_path_1}{wave_path_2}{glow_line}</g>')
-            extra_bg.append(f'<g id="spin_orbit_rings">{ambient_rings}</g>')
-            extra_bg.append(f'<g id="spin_particle_cluster">{particles_svg}{corner_chip}</g>')
-
         return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {self.width} {self.height}" width="{self.width}" height="{self.height}" lang="{lang}">
+{defs_svg}
 <!-- Base Background -->
 {bg_rect}
 {"".join(extra_bg)}

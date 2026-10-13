@@ -93,19 +93,7 @@ class InfographicLayoutRenderer:
 
     @staticmethod
     def _render_slide_header(renderer, slide: Dict[str, Any], rtl: bool, default_kicker: str) -> List[str]:
-        title = slide.get("title", "عنوان اسلاید")
-        kicker = slide.get("kicker", default_kicker)
-        font = renderer.theme.get("font_fa" if rtl else "font_en")
-        align = "end" if rtl else "start"
-        title_x = 1800 if rtl else 120
-
-        out = ['<g id="header_group">']
-        pill_x = (title_x - 240) if rtl else title_x
-        out.append(f'<rect x="{pill_x}" y="72" width="240" height="36" rx="18" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["primary"]}" stroke-width="1.5" />')
-        out.append(f'<text x="{pill_x + 120}" y="96" font-family="{font}" font-size="16" font-weight="700" fill="{renderer.theme["primary"]}" text-anchor="middle">{escape_xml(kicker)}</text>')
-        out.append(f'<text x="{title_x}" y="160" font-family="{font}" font-size="44" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        out.append('</g>')
-        return out
+        return renderer._render_style_header(slide, rtl, default_kicker)
 
     # ==========================================================================
     # 1. PYRAMID HIERARCHY (هرم سلسله‌مراتبی و سطوح اولویت)
@@ -165,14 +153,13 @@ class InfographicLayoutRenderer:
 
             svg.extend(renderer._card_rect(card_x, y1, card_w, tier_h, rx=22, stroke_width=2.0, top_accent=False))
             icon_cx = (card_x + card_w - 55) if rtl else (card_x + 55)
-            svg.append(f'<circle cx="{icon_cx}" cy="{mid_y}" r="30" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="2" />')
-            svg.append(get_icon_svg_content(item["icon"], icon_cx - 16, mid_y - 16, size=32, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(icon_cx, mid_y, 30, col, item["icon"], icon_size=32))
 
             tx = (card_x + card_w - 105) if rtl else (card_x + 105)
-            svg.append(f'<text x="{tx}" y="{y1 + 46}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{y1 + 52}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = y1 + 84
+            dy = y1 + 88
             for line in desc_lines[:3]:
                 svg.append(f'<text x="{tx}" y="{dy}" font-family="{font}" font-size="18" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">• {escape_xml(line)}</text>')
                 dy += 30
@@ -231,17 +218,16 @@ class InfographicLayoutRenderer:
             card_w = 880
             card_x = 920 if rtl else 120
             svg.extend(renderer._card_rect(card_x, y1, card_w, stage_h, rx=22, stroke_width=2.0, top_accent=False))
-            svg.append(f'<rect x="{(card_x + card_w - 8) if rtl else card_x}" y="{y1 + 14}" width="8" height="{stage_h - 28}" rx="4" fill="{col}" />')
+            svg.append(f'<rect x="{(card_x + card_w - 8) if rtl else card_x}" y="{y1 + 22}" width="8" height="{stage_h - 36}" rx="4" fill="{col}" />')
 
             icon_cx = (card_x + card_w - 60) if rtl else (card_x + 60)
-            svg.append(f'<circle cx="{icon_cx}" cy="{mid_y}" r="28" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="2" />')
-            svg.append(get_icon_svg_content(item["icon"], icon_cx - 15, mid_y - 15, size=30, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(icon_cx, mid_y + 4, 28, col, item["icon"], icon_size=30))
 
             tx = (card_x + card_w - 110) if rtl else (card_x + 110)
-            svg.append(f'<text x="{tx}" y="{y1 + 45}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{y1 + 52}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = y1 + 82
+            dy = y1 + 88
             for line in desc_lines[:3]:
                 svg.append(f'<text x="{tx}" y="{dy}" font-family="{font}" font-size="18" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">▸ {escape_xml(line)}</text>')
                 dy += 30
@@ -290,8 +276,7 @@ class InfographicLayoutRenderer:
             svg.append(f'<text x="{vx}" y="{label_y}" font-family="{font}" font-size="22" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(items[idx]["title"][:22])}</text>')
 
         # Central Intersection Nucleus
-        svg.append(f'<circle cx="{cx}" cy="{cy + 15}" r="48" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["primary"]}" stroke-width="3" />')
-        svg.append(get_icon_svg_content("sparkles", cx - 20, cy - 5, size=40, stroke_color=renderer.theme["primary"]))
+        svg.extend(renderer._render_icon_badge(cx, cy + 15, 46, renderer.theme["primary"], "sparkles", icon_size=40))
         svg.append('</g>')
 
         # 3 Perimeter Verbatim Cards
@@ -305,14 +290,13 @@ class InfographicLayoutRenderer:
             svg.append(f'<g id="venn_card_{idx+1}">')
             svg.extend(renderer._card_rect(px, py, pw, ph, rx=26, stroke_width=2.2))
             ic_x = (px + pw - 50) if rtl else (px + 50)
-            svg.append(f'<circle cx="{ic_x}" cy="{py + 55}" r="26" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="2" />')
-            svg.append(get_icon_svg_content(item["icon"], ic_x - 14, py + 41, size=28, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(ic_x, py + 62, 26, col, item["icon"], icon_size=28))
 
             tx = (px + pw - 95) if rtl else (px + 95)
-            svg.append(f'<text x="{tx}" y="{py + 63}" font-family="{font}" font-size="23" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{py + 68}" font-family="{font}" font-size="23" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = py + 115
+            dy = py + 120
             body_tx = (px + pw - 34) if rtl else (px + 34)
             for line in desc_lines[:6]:
                 svg.append(f'<text x="{body_tx}" y="{dy}" font-family="{font}" font-size="18" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">• {escape_xml(line)}</text>')
@@ -360,18 +344,17 @@ class InfographicLayoutRenderer:
             svg.extend(renderer._card_rect(qx, qy, qw, qh, rx=26, stroke_width=2.2))
 
             ic_x = (qx + qw - 55) if rtl else (qx + 55)
-            svg.append(f'<circle cx="{ic_x}" cy="{qy + 58}" r="30" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="2.2" />')
-            svg.append(get_icon_svg_content(item["icon"], ic_x - 16, qy + 42, size=32, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(ic_x, qy + 64, 30, col, item["icon"], icon_size=32))
 
             badge_x = (qx + 30) if rtl else (qx + qw - 95)
-            svg.append(f'<rect x="{badge_x}" y="{qy + 38}" width="65" height="32" rx="16" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="1.5" />')
-            svg.append(f'<text x="{badge_x + 32}" y="{qy + 60}" font-family="monospace" font-size="16" font-weight="700" fill="{col}" text-anchor="middle">{q_code}</text>')
+            svg.append(f'<rect x="{badge_x}" y="{qy + 44}" width="65" height="32" rx="8" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="1.5" />')
+            svg.append(f'<text x="{badge_x + 32}" y="{qy + 66}" font-family="monospace" font-size="16" font-weight="700" fill="{col}" text-anchor="middle">{q_code}</text>')
 
             tx = (qx + qw - 105) if rtl else (qx + 105)
-            svg.append(f'<text x="{tx}" y="{qy + 66}" font-family="{font}" font-size="25" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{qy + 72}" font-family="{font}" font-size="25" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = qy + 125
+            dy = qy + 128
             for line in desc_lines[:5]:
                 svg.append(f'<circle cx="{(tx - 8) if rtl else (tx + 8)}" cy="{dy - 6}" r="4.5" fill="{col}" />')
                 svg.append(f'<text x="{(tx - 26) if rtl else (tx + 26)}" y="{dy}" font-family="{font}" font-size="19" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">{escape_xml(line)}</text>')
@@ -380,9 +363,8 @@ class InfographicLayoutRenderer:
 
         # Central Spinning Compass Hub
         svg.append('<g id="spin_quadrant_compass">')
-        svg.append(f'<circle cx="{cx}" cy="{cy}" r="58" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["primary"]}" stroke-width="3" />')
         svg.append(f'<circle cx="{cx}" cy="{cy}" r="72" fill="none" stroke="{renderer.theme["secondary"]}" stroke-width="2" stroke-dasharray="6 6" />')
-        svg.append(get_icon_svg_content("compass", cx - 22, cy - 22, size=44, stroke_color=renderer.theme["primary"]))
+        svg.extend(renderer._render_icon_badge(cx, cy, 52, renderer.theme["primary"], "compass", icon_size=44))
         svg.append('</g>')
 
         svg.append('</svg>')
@@ -429,8 +411,7 @@ class InfographicLayoutRenderer:
             svg.append('</g>')
 
             svg.append(f'<g id="snake_step_{i+1}">')
-            svg.append(f'<circle cx="{nx}" cy="{ny}" r="36" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="3" />')
-            svg.append(get_icon_svg_content(item["icon"], nx - 18, ny - 18, size=36, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(nx, ny, 35, col, item["icon"], icon_size=36))
 
             card_w = min(410, step_dx - 24)
             card_h = 265
@@ -444,11 +425,11 @@ class InfographicLayoutRenderer:
 
             svg.extend(renderer._card_rect(card_x, card_y, card_w, card_h, rx=24, stroke_width=2.0))
             num_str = to_persian_digits(f"0{i+1}") if rtl else f"0{i+1}"
-            svg.append(f'<text x="{nx}" y="{card_y + 42}" font-family="{font}" font-size="18" font-weight="800" fill="{col}" text-anchor="middle">STEP {num_str}</text>')
-            svg.append(f'<text x="{nx}" y="{card_y + 82}" font-family="{font}" font-size="23" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{nx}" y="{card_y + 48}" font-family="{font}" font-size="18" font-weight="800" fill="{col}" text-anchor="middle">STEP {num_str}</text>')
+            svg.append(f'<text x="{nx}" y="{card_y + 86}" font-family="{font}" font-size="23" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = card_y + 128
+            dy = card_y + 132
             tx = (card_x + card_w - 26) if rtl else (card_x + 26)
             for line in desc_lines[:4]:
                 svg.append(f'<text x="{tx}" y="{dy}" font-family="{font}" font-size="17" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">• {escape_xml(line)}</text>')
@@ -492,14 +473,13 @@ class InfographicLayoutRenderer:
             svg.append(f'<g id="mindmap_branch_{idx+1}">')
             svg.extend(renderer._card_rect(bx, by, bw, bh, rx=26, stroke_width=2.2))
             ic_x = (bx + bw - 52) if rtl else (bx + 52)
-            svg.append(f'<circle cx="{ic_x}" cy="{by + 55}" r="28" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="2" />')
-            svg.append(get_icon_svg_content(item["icon"], ic_x - 15, by + 40, size=30, stroke_color=col))
+            svg.extend(renderer._render_icon_badge(ic_x, by + 62, 28, col, item["icon"], icon_size=30))
 
             tx = (bx + bw - 98) if rtl else (bx + 98)
-            svg.append(f'<text x="{tx}" y="{by + 63}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{by + 68}" font-family="{font}" font-size="24" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = by + 118
+            dy = by + 122
             for line in desc_lines[:4]:
                 svg.append(f'<circle cx="{(tx - 8) if rtl else (tx + 8)}" cy="{dy - 6}" r="4" fill="{col}" />')
                 svg.append(f'<text x="{(tx - 24) if rtl else (tx + 24)}" y="{dy}" font-family="{font}" font-size="18" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">{escape_xml(line)}</text>')
@@ -515,10 +495,10 @@ class InfographicLayoutRenderer:
         svg.append('</g>')
 
         svg.append('<g id="mindmap_nucleus">')
-        svg.append(f'<circle cx="{cx}" cy="{cy}" r="118" fill="{renderer.theme["surface"]}" stroke="{renderer.theme["primary"]}" stroke-width="3.5" />')
+        svg.extend(renderer._card_rect(cx - 115, cy - 110, 230, 220))
         svg.append(get_icon_svg_content("brain", cx - 28, cy - 52, size=56, stroke_color=renderer.theme["primary"]))
-        short_title = title[:24] + ("…" if len(title) > 24 else "")
-        svg.append(f'<text x="{cx}" y="{cy + 36}" font-family="{font}" font-size="22" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(short_title)}</text>')
+        short_title = title[:22] + ("…" if len(title) > 22 else "")
+        svg.append(f'<text x="{cx}" y="{cy + 42}" font-family="{font}" font-size="21" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(short_title)}</text>')
         svg.append('</g>')
 
         svg.append('</svg>')
@@ -552,9 +532,8 @@ class InfographicLayoutRenderer:
         svg.append('</g>')
 
         svg.append('<g id="fishbone_effect_node">')
-        svg.append(f'<circle cx="{head_x}" cy="{spine_y}" r="88" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["primary"]}" stroke-width="3.5" />')
-        svg.append(get_icon_svg_content("target", head_x - 24, spine_y - 42, size=48, stroke_color=renderer.theme["primary"]))
-        svg.append(f'<text x="{head_x}" y="{spine_y + 32}" font-family="{font}" font-size="20" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">هدف / اثر اصلی</text>')
+        svg.extend(renderer._render_icon_badge(head_x, spine_y - 16, 48, renderer.theme["primary"], "target", icon_size=48))
+        svg.append(f'<text x="{head_x}" y="{spine_y + 62}" font-family="{font}" font-size="20" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="middle">هدف / اثر اصلی</text>')
         svg.append('</g>')
 
         rib_slots = [
@@ -573,10 +552,10 @@ class InfographicLayoutRenderer:
             svg.append(f'<g id="fishbone_rib_{idx+1}">')
             svg.extend(renderer._card_rect(cx_box, cy_box, bw, bh, rx=22, stroke_width=2.0))
             tx = (cx_box + bw - 35) if rtl else (cx_box + 35)
-            svg.append(f'<text x="{tx}" y="{cy_box + 52}" font-family="{font}" font-size="23" font-weight="700" fill="{col}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{cy_box + 56}" font-family="{font}" font-size="23" font-weight="700" fill="{col}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = cy_box + 102
+            dy = cy_box + 104
             for line in desc_lines[:4]:
                 svg.append(f'<text x="{tx}" y="{dy}" font-family="{font}" font-size="18" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">• {escape_xml(line)}</text>')
                 dy += 36
@@ -654,14 +633,14 @@ class InfographicLayoutRenderer:
             num_val = item["number"] or (to_persian_digits(f"{92 - i*7}%") if rtl else f"{92 - i*7}%")
             badge_cx = (stack_x + stack_w - 85) if rtl else (stack_x + 85)
             badge_cy = cy_card + card_h / 2
-            svg.append(f'<circle cx="{badge_cx}" cy="{badge_cy}" r="54" fill="{renderer.theme["badge_bg"]}" stroke="{col}" stroke-width="3" />')
-            svg.append(f'<text x="{badge_cx}" y="{badge_cy + 10}" font-family="{font}" font-size="28" font-weight="900" fill="{col}" text-anchor="middle">{escape_xml(num_val)}</text>')
+            svg.extend(renderer._card_rect(badge_cx - 52, badge_cy - 44, 104, 88, rx=18, stroke_width=2.2, top_accent=False))
+            svg.append(f'<text x="{badge_cx}" y="{badge_cy + 10}" font-family="{font}" font-size="26" font-weight="900" fill="{col}" text-anchor="middle">{escape_xml(num_val)}</text>')
 
             tx = (stack_x + stack_w - 165) if rtl else (stack_x + 165)
-            svg.append(f'<text x="{tx}" y="{cy_card + 58}" font-family="{font}" font-size="25" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
+            svg.append(f'<text x="{tx}" y="{cy_card + 62}" font-family="{font}" font-size="25" font-weight="700" fill="{renderer.theme["text_main"]}" text-anchor="{align}">{escape_xml(item["title"])}</text>')
 
             desc_lines = [l.strip() for l in item["desc"].split("\n") if l.strip()]
-            dy = cy_card + 104
+            dy = cy_card + 106
             for line in desc_lines[:3]:
                 svg.append(f'<text x="{tx}" y="{dy}" font-family="{font}" font-size="19" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">• {escape_xml(line)}</text>')
                 dy += 34
@@ -693,7 +672,7 @@ class InfographicLayoutRenderer:
 
         # Table Header Bar
         svg.append('<g id="smart_table_header">')
-        svg.append(f'<rect x="{table_x}" y="{table_y}" width="{table_w}" height="{header_h}" rx="16" fill="{renderer.theme["primary"]}" />')
+        svg.append(f'<rect x="{table_x}" y="{table_y}" width="{table_w}" height="{header_h}" rx="8" fill="{renderer.theme["primary"]}" />')
         if rtl:
             svg.append(f'<text x="1740" y="{table_y + 46}" font-family="{font}" font-size="22" font-weight="800" fill="{renderer.theme["background"]}" text-anchor="end">محور / شاخص کلیدی</text>')
             svg.append(f'<text x="1220" y="{table_y + 46}" font-family="{font}" font-size="22" font-weight="800" fill="{renderer.theme["background"]}" text-anchor="end">شرح و جزئیات تخصصی</text>')
@@ -705,11 +684,11 @@ class InfographicLayoutRenderer:
         svg.append('</g>')
 
         for i, item in enumerate(items):
-            ry = table_y + header_h + 12 + i * (row_h + 10)
+            ry = table_y + header_h + 12 + i * (row_h + 12)
             svg.append(f'<g id="table_row_{i+1}">')
-            svg.append(f'<rect x="{table_x}" y="{ry}" width="{table_w}" height="{row_h}" rx="14" fill="{renderer.theme["surface"]}" stroke="{renderer.theme["surface_border"]}" stroke-width="1.6" />')
+            svg.extend(renderer._card_rect(table_x, ry, table_w, row_h, rx=14, stroke_width=1.6, top_accent=False))
 
-            mid_ry = ry + row_h / 2
+            mid_ry = ry + row_h / 2 + 4
             col_t = 1740 if rtl else 180
             col_d = 1220 if rtl else 680
             col_s = 260 if rtl else 1640
@@ -720,7 +699,7 @@ class InfographicLayoutRenderer:
             svg.append(f'<text x="{col_d}" y="{mid_ry + 8}" font-family="{font}" font-size="19" font-weight="400" fill="{renderer.theme["text_muted"]}" text-anchor="{align}">{escape_xml(flat_desc[:95])}</text>')
 
             status_lbl = item["trend"] or item["number"] or ("✓ تاییدشده" if rtl else "✓ VERIFIED")
-            svg.append(f'<rect x="{col_s - 90}" y="{mid_ry - 20}" width="180" height="40" rx="20" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["secondary"]}" stroke-width="1.8" />')
+            svg.append(f'<rect x="{col_s - 90}" y="{mid_ry - 20}" width="180" height="40" rx="10" fill="{renderer.theme["badge_bg"]}" stroke="{renderer.theme["secondary"]}" stroke-width="1.8" />')
             svg.append(f'<text x="{col_s}" y="{mid_ry + 7}" font-family="{font}" font-size="16" font-weight="700" fill="{renderer.theme["secondary"]}" text-anchor="middle">{escape_xml(status_lbl)}</text>')
             svg.append('</g>')
 
@@ -779,27 +758,27 @@ class InfographicLayoutRenderer:
 
         svg = [renderer._header_svg(rtl, slide_idx=slide_idx)]
 
-        cx, cy = 960, 460
+        cx, cy = 960, 440
 
         # Spinning Grand Finale Medallion Rings
         svg.append('<g id="spin_closing_emblem">')
-        svg.append(f'<circle cx="{cx}" cy="{cy}" r="185" fill="none" stroke="{renderer.theme["primary"]}" stroke-width="2.5" stroke-dasharray="10 8" stroke-opacity="0.65" />')
-        svg.append(f'<circle cx="{cx}" cy="{cy}" r="220" fill="none" stroke="{renderer.theme["secondary"]}" stroke-width="1.5" stroke-dasharray="5 9" stroke-opacity="0.45" />')
-        svg.append(f'<circle cx="{cx + 185}" cy="{cy}" r="7" fill="{renderer.theme["accent"]}" />')
-        svg.append(f'<circle cx="{cx - 185}" cy="{cy}" r="7" fill="{renderer.theme["primary"]}" />')
+        svg.append(f'<circle cx="{cx}" cy="{cy}" r="195" fill="none" stroke="{renderer.theme["primary"]}" stroke-width="2.5" stroke-dasharray="10 8" stroke-opacity="0.65" />')
+        svg.append(f'<circle cx="{cx}" cy="{cy}" r="230" fill="none" stroke="{renderer.theme["secondary"]}" stroke-width="1.5" stroke-dasharray="5 9" stroke-opacity="0.45" />')
+        svg.append(f'<circle cx="{cx + 195}" cy="{cy}" r="7" fill="{renderer.theme["accent"]}" />')
+        svg.append(f'<circle cx="{cx - 195}" cy="{cy}" r="7" fill="{renderer.theme["primary"]}" />')
         svg.append('</g>')
 
         svg.append('<g id="closing_centerpiece">')
-        svg.append(f'<circle cx="{cx}" cy="{cy}" r="135" fill="{renderer.theme["surface"]}" stroke="{renderer.theme["primary"]}" stroke-width="3.5" />')
-        svg.append(get_icon_svg_content("award", cx - 36, cy - 58, size=72, stroke_color=renderer.theme["primary"]))
-        svg.append(f'<text x="{cx}" y="{cy + 55}" font-family="{font}" font-size="22" font-weight="700" fill="{renderer.theme["secondary"]}" text-anchor="middle">{escape_xml(kicker)}</text>')
+        svg.extend(renderer._card_rect(cx - 160, cy - 140, 320, 280))
+        svg.extend(renderer._render_icon_badge(cx, cy - 28, 48, renderer.theme["primary"], "award", icon_size=54))
+        svg.append(f'<text x="{cx}" y="{cy + 75}" font-family="{font}" font-size="22" font-weight="700" fill="{renderer.theme["secondary"]}" text-anchor="middle">{escape_xml(kicker)}</text>')
 
-        svg.append(f'<text x="{cx}" y="745" font-family="{font}" font-size="54" font-weight="900" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(title)}</text>')
+        svg.append(f'<text x="{cx}" y="735" font-family="{font}" font-size="54" font-weight="900" fill="{renderer.theme["text_main"]}" text-anchor="middle">{escape_xml(title)}</text>')
 
         if items:
             summary_str = "  ✦  ".join([x["title"] for x in items[:3]])
-            svg.append(f'<rect x="310" y="810" width="1300" height="64" rx="32" fill="{renderer.theme["surface"]}" stroke="{renderer.theme["surface_border"]}" stroke-width="2" />')
-            svg.append(f'<text x="{cx}" y="850" font-family="{font}" font-size="22" font-weight="600" fill="{renderer.theme["text_muted"]}" text-anchor="middle">{escape_xml(summary_str)}</text>')
+            svg.extend(renderer._card_rect(310, 795, 1300, 78, rx=24, stroke_width=2.0, top_accent=False))
+            svg.append(f'<text x="{cx}" y="844" font-family="{font}" font-size="22" font-weight="600" fill="{renderer.theme["text_muted"]}" text-anchor="middle">{escape_xml(summary_str)}</text>')
         svg.append('</g>')
 
         svg.append('</svg>')

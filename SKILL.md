@@ -1,32 +1,36 @@
 ---
 name: ppt-saz
 description: >
-  AI Presentation Director & Native PowerPoint (PPTX) Generator (v5.0) with 6 distinct art styles
-  (Cyber HUD, Swiss Academic, Neo-Brutalism, Apple Bento-Grid, Warm Botanical, Royal Gold Noir), 12 light/dark themes,
-  18 specialized slide & infographic diagram layouts (Pyramid, Funnel, Venn, 2x2 Quadrant SWOT, Snake Roadmap, Mind-Map,
-  Fishbone, Vector Radar Charts, Smart Tables), Autonomous Semantic Anti-Repetition Layout Director,
+  AI Presentation Director & Native PowerPoint (PPTX) Generator (v5.5) with 9 Polymorphic Art-Style Visual Skins
+  (Cyber HUD, Swiss Academic, Neo-Brutalist Retro OS, Apple Bento-Grid, Warm Botanical Roman Arch, Royal Gold Noir,
+  Bauhaus Weimar 1923 Color-Block, Memphis Paper Cutout Collage, and Architectural CAD Blueprint Schematic),
+  22 light/dark themes, 18 specialized slide & infographic diagram layouts (Pyramid, Funnel, Venn, 2x2 Quadrant SWOT,
+  Snake Roadmap, Mind-Map, Fishbone, Vector Radar Charts, Smart Tables), Autonomous Semantic Anti-Repetition Layout Director,
   Hybrid Custom .pptx Template & Icon Ingestion (--template-pptx), 5000+ vector icons, single-click Morph transitions,
   continuous looping particle & orbit animations, and native bilingual (Persian RTL with Yekan Bakh / English LTR) typography.
   Use when the user asks to create, design, generate, or beautify PowerPoint presentations (.pptx),
   use a custom .pptx template, turn text/notes into slides, or mentions "پاورپوینت", "اسلاید", "presentation", "PPT", or "PPT_Saz".
 ---
 
-# اسکیل ساخت خودکار و نیتیو پاورپوینت (`PPT_Saz v5.0` — Next-Gen Infographic & Custom Template Studio)
+# اسکیل ساخت خودکار و نیتیو پاورپوینت (`PPT_Saz v5.5` — Polymorphic 9-Art-Style & Infographic Studio)
 
-این اسکیل بر پایه یافته‌های مقالات علمی روز (**PPTAgent** در EMNLP، **AutoPresent** در CVPR و **DOC2PPT** در AAAI) برای تولید ارائه‌های فوق‌حرفه‌ای، مجهز به **۶ معماری بصری کاملاً متمایز**، **۱۸ ساختار دیاگرام و اینفوگرافیک متنوع**، **کارگردان هوشمند ضدتکرار چیدمان**، **قابلیت پذیرش تمپلیت `.pptx` اختصاصی کاربر (Hybrid Custom Template Ingestion)** و **انیمیشن‌های ممتد بدون توقف با ترنزیشن تک‌کلیک Morph** طراحی شده است.
+این اسکیل بر پایه یافته‌های مقالات علمی روز (**PPTAgent** در EMNLP، **AutoPresent** در CVPR و **DOC2PPT** در AAAI) و موتور **پوسته بصری چندریختی (`ArtStyleSkinEngine`)** طراحی شده است؛ به‌طوری که هر کدام از **۹ آرت‌استایل**، شکل هندسیِ **هر ۵ المان پایه (کادرها، هدرها، قاب آیکون‌ها، اسلاید کاور و بوم پس‌زمینه)** را در دلِ تمام **۱۸ ساختار و دیاگرام** به‌طور کامل دگرگون می‌کنند.
 
 ---
 
-## 🎨 ۶ کهن‌الگوی آرت‌استایل و ۱۲ تم رنگی اختصاصی
+## 🎨 ۹ کهن‌الگوی آرت‌استایل چندریختی و ۲۲ تم رنگی اختصاصی
 
-| # | کهن‌الگو (Art-Style) | تم روشن (Light) | تم تیره (Dark) | معماری فضایی و هندسی منحصربه‌فرد |
+| # | کهن‌الگو (Art-Style) | تم روشن (Light) | تم تیره (Dark) | هندسه کادر، هدر و قاب آیکون منحصربه‌فرد (`ArtStyleSkinEngine`) |
 |---|---|---|---|---|
-| **۱** | **Apple Bento-Grid** | `bento_glass_light` | `bento_glass_dark` | موزاییک نامتقارن (۱ کارت بزرگ Hero + ۲ مینی‌کارت)، شیشه‌ای نرم (`rx=28-32`) و اورب‌های نوری |
-| **۲** | **Swiss Academic** | `swiss_academic_light` | `swiss_academic_dark` | گرید علمی میکرومتری، خط لوله چورون مرحله‌ای، جدول کارآزمایی بالینی با `[95% CI]` |
-| **۳** | **Neo-Brutalist Pop** | `neo_brutalist_light` | `neo_brutalist_dark` | بلوک‌های ضخیم با بردر ۳.۵px مشکی، سایه سخت ۱۰px آفست مشکی، استیکرهای چرخیده و ستاره انفجاری VS |
-| **۴** | **Warm Editorial** | `warm_editorial_light` | `warm_editorial_dark` | قاب‌های قوسی پنجره کلیسایی (`Arched Windows`)، اعداد واتر‌مارک سایز ۱۹۰ کمرنگ، امواج ارگانیک |
-| **۵** | **Royal Gold Noir** | `royal_gold_light` | `royal_gold_dark` | پدستال‌های هشت‌ضلعی گوشه‌بریده (`Beveled Octagons`)، خطوط دوبل طلای ۲۴ عیار و مدال‌های الماسی `◆` |
-| **۶** | **Cyber HUD** | `cyber_light` | `cyber_aurora` | کنسول‌های تله‌متری چمفر ۴۵ درجه، رینگ‌های راداری چرخان، گیج‌های کالیبراسیون و ذرات کهکشانی |
+| **۱** | **Neo-Brutalist Retro OS** | `neo_brutalist_light` | `neo_brutalist_dark` | پنجره سیستم‌عامل رترو با ۳ دکمه `🔴🟡🟢`، گوشه تیز (`rx=0`)، سایه سخت ۱۰px مشکی، هدر استیکر کج |
+| **۲** | **Bauhaus Weimar 1923** | `bauhaus_weimar_light` | `bauhaus_construct_dark` | بلوک‌های هندسی کانستراکتیویسم (قرمز/زرد/آبی)، برش ربع‌دایره، هدر با اشکال `■ ▲ ●` و موبایل چرخان |
+| **۳** | **Paper Cutout Memphis** | `paper_cutout_pop` | `paper_cutout_dark` | کلاژ کاغذ رنگی برش‌خورده چندضلعی، چسب نواری بالای کارت‌ها (`Masking Tape`)، خط زیگزاگ و فرفره چرخان |
+| **۴** | **Blueprint CAD Schematic** | `blueprint_arch_light` | `blueprint_cad_dark` | نقشه مهندسی سیانوتایپ، خطوط امتدادیافته از گوشه‌ها، مهر فنی `CAD // WxH` و کولیس چرخان |
+| **۵** | **Cyber HUD Telemetry** | `cyber_light` | `cyber_aurora` | چندضلعی برش‌خورده ۴۵ درجه (`Chamfered Polygon`)، براکت‌های هدف‌گیری `[ ]`، آیکون شش‌ضلعی و رادار |
+| **۶** | **Royal Gold Art-Deco** | `royal_gold_light` | `royal_gold_dark` | هشت‌ضلعی جواهری پخ‌خورده با قاب دوبل طلایی، هدر وسط‌چین با بال‌های متقارن و نشان ستاره ۸ پر `◆` |
+| **۷** | **Warm Editorial Arch** | `warm_editorial_light` | `warm_editorial_dark` | طاق معماری رومی (`Roman Arch Silhouette`)، سرصفحه مجله‌ای دولایه و مدالیون گیاهی |
+| **۸** | **Swiss Academic Grid** | `swiss_academic_light` | `swiss_academic_dark` | ورق تیز مهندسی (`rx=0`) با علامت‌های ثبت چهارراه `+` در ۴ گوشه، گرید میلی‌متری و قطب‌نمای علمی |
+| **۹** | **Apple Bento Squircle** | `bento_glass_light` | `bento_glass_dark` | اسکوئیرکل شیشه‌ای (`rx=36`) با بازتاب نور بالایی، هدر `Dynamic Island` اپل و آیکون اپ iOS |
 
 ---
 

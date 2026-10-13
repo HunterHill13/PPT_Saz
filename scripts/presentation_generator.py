@@ -48,6 +48,7 @@ from custom_template_ingestor import (
     ingest_custom_pptx_template,
     upgrade_cloned_slide_svg_with_motion_and_text,
 )
+from art_style_skins import ArtStyleSkinEngine
 
 configure_utf8_stdio()
 
@@ -104,33 +105,18 @@ class SlideRenderer:
         self.is_dark = theme.get("is_dark", True)
 
     def _card_rect(self, x: float, y: float, w: float, h: float, rx: float = 28, stroke_width: float = 2.0, top_accent: bool = True) -> List[str]:
-        """Generate style-aware card background shape and accents tailored to current art-style."""
-        out = []
-        if self.archetype == "neo_brutalist":
-            shadow_col = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
-            border_col = "#000000" if not self.is_dark else "#FFFFFF"
-            out.append(f'<rect x="{x + 8}" y="{y + 8}" width="{w}" height="{h}" rx="18" fill="{shadow_col}" />')
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="18" fill="{self.theme["surface"]}" stroke="{border_col}" stroke-width="3.5" />')
-        elif self.archetype == "swiss_academic":
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.2" />')
-            if top_accent:
-                out.append(f'<rect x="{x}" y="{y}" width="{w}" height="4" rx="2" fill="{self.theme["secondary"]}" />')
-        elif self.archetype == "apple_bento":
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="28" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.5" stroke-opacity="0.85" />')
-            if top_accent:
-                out.append(f'<rect x="{x + 24}" y="{y}" width="{w - 48}" height="2" fill="{self.theme["primary"]}" fill-opacity="0.5" />')
-        elif self.archetype == "royal_gold":
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="1.5" />')
-            out.append(f'<rect x="{x + 6}" y="{y + 6}" width="{w - 12}" height="{h - 12}" rx="12" fill="none" stroke="{self.theme["primary"]}" stroke-width="0.75" stroke-opacity="0.4" />')
-        elif self.archetype == "warm_editorial":
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="22" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="1.8" />')
-            if top_accent:
-                out.append(f'<rect x="{x + 30}" y="{y}" width="{w - 60}" height="3" rx="1.5" fill="{self.theme["primary"]}" />')
-        else:  # cyber_hud
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="{stroke_width}" />')
-            if top_accent:
-                out.append(f'<rect x="{x + 40}" y="{y}" width="{w - 80}" height="5" rx="2.5" fill="{self.theme["primary"]}" />')
-        return out
+        """Generate polymorphic style-aware card silhouette and accents tailored to current art-style."""
+        return ArtStyleSkinEngine.render_card_container(
+            self, x, y, w, h, rx=rx, stroke_width=stroke_width, top_accent=top_accent
+        )
+
+    def _render_style_header(self, slide: Dict[str, Any], rtl: bool, default_kicker: str) -> List[str]:
+        """Generate polymorphic style-aware slide header tailored to current art-style."""
+        return ArtStyleSkinEngine.render_style_header(self, slide, rtl, default_kicker)
+
+    def _render_icon_badge(self, cx: float, cy: float, r: float, color: str, icon_key: str, icon_size: Optional[int] = None) -> List[str]:
+        """Generate polymorphic style-aware icon frame tailored to current art-style."""
+        return ArtStyleSkinEngine.render_icon_badge(self, cx, cy, r, color, icon_key, icon_size=icon_size)
 
     def _header_svg(self, is_rtl: bool, slide_idx: int = 1) -> str:
         lang = "fa" if is_rtl else "en"
@@ -249,6 +235,9 @@ class SlideRenderer:
             extra_bg.append(pinstripes)
             extra_bg.append(crest_svg)
 
+        elif self.archetype in ("bauhaus_modern", "paper_cutout", "blueprint_schematic"):
+            extra_bg.extend(ArtStyleSkinEngine.render_ambient_canvas(self, is_rtl, slide_idx=slide_idx))
+
         else:  # cyber_hud
             particles = []
             part_base_x = 120 if is_rtl else 1650
@@ -307,96 +296,8 @@ class SlideRenderer:
 """
 
     def render_title_slide(self, slide: Dict[str, Any], image_rel_path: Optional[str] = None) -> str:
-        """Slidesgo Ultra-Poster Cover with spinning circular orbit frame & verbatim typography."""
-        title = slide.get("title", "عنوان ارائه")
-        subtitle = slide.get("subtitle", "")
-        author = slide.get("author", "")
-        kicker = slide.get("kicker", "ارائه تخصصی")
-        rtl = is_persian(title) or is_persian(subtitle)
-
-        font = self.theme.get('font_fa' if rtl else 'font_en')
-        align = "end" if rtl else "start"
-        x_pos = 1720 if rtl else 140
-
-        svg = [self._header_svg(rtl, slide_idx=1)]
-
-        # Glowing Category Pill Chip on top
-        svg.append('<g id="kicker_pill">')
-        pill_w = max(240, len(kicker) * 20)
-        pill_x = (x_pos - pill_w) if rtl else x_pos
-        svg.append(f'<rect x="{pill_x}" y="210" width="{pill_w}" height="48" rx="24" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2" />')
-        # Circular glowing dot inside pill
-        dot_in_pill = (pill_x + pill_w - 24) if rtl else (pill_x + 24)
-        svg.append(f'<circle cx="{dot_in_pill}" cy="234" r="6" fill="{self.theme["primary"]}" />')
-        chip_tx = (pill_x + (pill_w / 2) - 10) if rtl else (pill_x + (pill_w / 2) + 10)
-        svg.append(f'<text x="{chip_tx}" y="242" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="middle">{escape_xml(kicker)}</text>')
-        svg.append('</g>')
-
-        # Title & Subtitle Group (Verbatim Text)
-        svg.append('<g id="title_group">')
-        svg.append(f'<text x="{x_pos}" y="350" font-family="{font}" font-size="64" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        if subtitle:
-            sub_lines = subtitle.split("\n")
-            sy = 440
-            for s_line in sub_lines[:4]:
-                if s_line.strip():
-                    svg.append(f'<text x="{x_pos}" y="{sy}" font-family="{font}" font-size="28" font-weight="600" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(s_line.strip())}</text>')
-                    sy += 44
-        svg.append('</g>')
-
-        # Radiant Spine Accent Bar
-        svg.append('<g id="accent_spine">')
-        bar_x = (x_pos + 25) if rtl else (x_pos - 30)
-        svg.append(f'<rect x="{bar_x}" y="290" width="10" height="230" fill="{self.theme["primary"]}" rx="5" />')
-        svg.append(f'<rect x="{bar_x-3}" y="290" width="16" height="60" fill="{self.theme["secondary"]}" rx="4" />')
-        svg.append('</g>')
-
-        # Presenter Card Pill
-        if author:
-            svg.append('<g id="author_chip">')
-            auth_w = max(300, len(author) * 19)
-            auth_x = (x_pos - auth_w) if rtl else x_pos
-            svg.append(f'<rect x="{auth_x}" y="600" width="{auth_w}" height="64" rx="24" fill="{self.theme["surface"]}" stroke="{self.theme["surface_border"]}" stroke-width="2" />')
-            icon_x = (auth_x + auth_w - 48) if rtl else (auth_x + 16)
-            svg.append(get_icon_svg_content("user", icon_x, 616, size=30, stroke_color=self.theme["primary"]))
-            auth_tx = (auth_x + auth_w - 65) if rtl else (auth_x + 56)
-            svg.append(f'<text x="{auth_tx}" y="640" font-family="{font}" font-size="22" font-weight="600" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(author)}</text>')
-            svg.append('</g>')
-
-        # Hero Image Frame with Spinning Circular Orbits & Badges
-        if image_rel_path:
-            img_x = 100 if rtl else 1050
-            center_hero_x = img_x + 375
-            center_hero_y = 530
-
-            # Spinning Dashed Orbit Rings around the Hero Center
-            svg.append('<g id="spin_hero_orbit">')
-            svg.append(f'<circle cx="{center_hero_x}" cy="{center_hero_y}" r="390" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-opacity="0.35" stroke-dasharray="12 8" />')
-            svg.append(f'<circle cx="{center_hero_x}" cy="{center_hero_y}" r="430" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1.2" stroke-opacity="0.25" stroke-dasharray="6 12" />')
-            # Orbital satellites
-            svg.append(f'<circle cx="{center_hero_x + 390}" cy="{center_hero_y}" r="8" fill="{self.theme["accent"]}" />')
-            svg.append(f'<circle cx="{center_hero_x - 390}" cy="{center_hero_y}" r="6" fill="{self.theme["primary"]}" />')
-            svg.append('</g>')
-
-            svg.append('<g id="hero_image">')
-            svg.append(f'<rect x="{img_x-8}" y="192" width="766" height="676" rx="42" fill="none" stroke="{self.theme["secondary"]}" stroke-width="2" stroke-opacity="0.4" />')
-            svg.append(f'<rect x="{img_x}" y="200" width="750" height="660" rx="38" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
-            svg.append(f'<image href="{image_rel_path}" x="{img_x+12}" y="212" width="726" height="636" preserveAspectRatio="xMidYMid slice" />')
-            
-            # Floating Circular Badge Medallion on Image Corner
-            badge_cx = (img_x + 90) if rtl else (img_x + 660)
-            badge_cy = 270
-            svg.append(f'<circle cx="{badge_cx}" cy="{badge_cy}" r="38" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
-            svg.append(f'<circle cx="{badge_cx}" cy="{badge_cy}" r="46" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1.5" stroke-dasharray="4 4" />')
-            svg.append(get_icon_svg_content("award", badge_cx - 20, badge_cy - 20, size=40, stroke_color=self.theme["primary"]))
-
-            # Lower Capsule Tag
-            svg.append(f'<rect x="{img_x+40}" y="780" width="260" height="52" rx="26" fill="{self.theme["background"]}" fill-opacity="0.94" stroke="{self.theme["primary"]}" stroke-width="2" />')
-            svg.append(f'<text x="{img_x+170}" y="813" font-family="{font}" font-size="19" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">✦ ارائه تاییدشده رسمی</text>')
-            svg.append('</g>')
-
-        svg.append('</svg>')
-        return "\n".join(svg)
+        """Polymorphic Cover Slide tailored to each of the 9 Art-Style Archetypes."""
+        return ArtStyleSkinEngine.render_cover_slide(self, slide, image_rel_path=image_rel_path)
 
     def render_content_cards_slide(self, slide: Dict[str, Any], slide_idx: int = 2) -> str:
         """Slidesgo Feature Cards with distinct layout architecture per archetype."""
@@ -421,12 +322,7 @@ class SlideRenderer:
         align = "end" if rtl else "start"
 
         svg = [self._header_svg(rtl, slide_idx=slide_idx)]
-
-        # Header Block
-        svg.append('<g id="header_group">')
-        svg.append(f'<text x="{title_x}" y="105" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(kicker)}</text>')
-        svg.append(f'<text x="{title_x}" y="165" font-family="{font}" font-size="48" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        svg.append('</g>')
+        svg.extend(self._render_style_header(slide, rtl, kicker))
 
         count = max(1, len(cards))
         margin = 110
@@ -450,29 +346,27 @@ class SlideRenderer:
 
             # Spinning Dashed Halo around the Crown (top-level continuous motion group)
             crown_cx = center_card_x
-            crown_cy = card_y + 45
-            crown_r = 52
+            crown_cy = card_y + 52
+            crown_r = 46
             svg.append(f'<g id="spin_card_halo_{i+1}">')
-            svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 14}" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-dasharray="6 5" stroke-opacity="0.55" />')
-            svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 24}" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1" stroke-dasharray="3 6" stroke-opacity="0.3" />')
-            svg.append(f'<circle cx="{crown_cx + crown_r + 14}" cy="{crown_cy}" r="4" fill="{self.theme["accent"]}" />')
+            svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 16}" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-dasharray="6 5" stroke-opacity="0.55" />')
+            svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r + 26}" fill="none" stroke="{self.theme["secondary"]}" stroke-width="1" stroke-dasharray="3 6" stroke-opacity="0.3" />')
+            svg.append(f'<circle cx="{crown_cx + crown_r + 16}" cy="{crown_cy}" r="4" fill="{self.theme["accent"]}" />')
             svg.append('</g>')
 
             svg.append(f'<g id="card_{i+1}">')
             # Style-aware Card Body
             svg.extend(self._card_rect(c_x, card_y, card_w, card_h, rx=34, stroke_width=2.5))
-            # Circular Medallion Disc
-            svg.append(f'<circle cx="{crown_cx}" cy="{crown_cy}" r="{crown_r}" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.8" />')
-            # Vector Icon Centered in Medallion
-            svg.append(get_icon_svg_content(icon_key, crown_cx - 24, crown_cy - 24, size=48, stroke_color=self.theme["primary"]))
+            # Polymorphic Icon Badge
+            svg.extend(self._render_icon_badge(crown_cx, crown_cy, crown_r, self.theme["primary"], icon_key, icon_size=46))
 
             # Step / Index Tag Pill under crown
             num_str = to_persian_digits(i + 1) if rtl else f"0{i+1}"
-            svg.append(f'<rect x="{center_card_x - 34}" y="{card_y + 115}" width="68" height="30" rx="15" fill="{self.theme["background"]}" stroke="{self.theme["secondary"]}" stroke-width="1.5" />')
-            svg.append(f'<text x="{center_card_x}" y="{card_y + 137}" font-family="{font}" font-size="18" font-weight="700" fill="{self.theme["secondary"]}" text-anchor="middle">{num_str}</text>')
+            svg.append(f'<rect x="{center_card_x - 34}" y="{card_y + 118}" width="68" height="30" rx="10" fill="{self.theme["background"]}" stroke="{self.theme["secondary"]}" stroke-width="1.5" />')
+            svg.append(f'<text x="{center_card_x}" y="{card_y + 140}" font-family="{font}" font-size="18" font-weight="700" fill="{self.theme["secondary"]}" text-anchor="middle">{num_str}</text>')
 
             # Card Title (Verbatim)
-            svg.append(f'<text x="{center_card_x}" y="{card_y + 185}" font-family="{font}" font-size="28" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(c_title)}</text>')
+            svg.append(f'<text x="{center_card_x}" y="{card_y + 188}" font-family="{font}" font-size="28" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(c_title)}</text>')
 
             # Verbatim Text Preservation: split into structured lines with circular glowing bullets
             desc_lines = c_desc.split("\n")
@@ -510,16 +404,10 @@ class SlideRenderer:
         rtl = is_persian(title) or any(is_persian(str(s)) for s in steps)
 
         font = self.theme.get('font_fa' if rtl else 'font_en')
-        title_x = 1800 if rtl else 120
         align = "end" if rtl else "start"
 
         svg = [self._header_svg(rtl, slide_idx=slide_idx)]
-
-        # Header
-        svg.append('<g id="header_group">')
-        svg.append(f'<text x="{title_x}" y="105" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(kicker)}</text>')
-        svg.append(f'<text x="{title_x}" y="165" font-family="{font}" font-size="48" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        svg.append('</g>')
+        svg.extend(self._render_style_header(slide, rtl, kicker))
 
         count = max(1, len(steps))
         margin = 110
@@ -554,26 +442,23 @@ class SlideRenderer:
             svg.append('</g>')
 
             svg.append(f'<g id="step_node_{i+1}">')
-            # Inner Glass Circular Medallion
-            svg.append(f'<circle cx="{center_x}" cy="{hub_y}" r="92" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
+            # Polymorphic Hub Badge
+            svg.extend(self._render_icon_badge(center_x, hub_y - 12, 54, self.theme["secondary"], icon_key, icon_size=48))
 
             # Top Step Number Bubble
             num_str = to_persian_digits(i + 1) if rtl else f"0{i+1}"
-            svg.append(f'<circle cx="{center_x}" cy="{hub_y - 74}" r="26" fill="{self.theme["badge_bg"]}" stroke="{self.theme["secondary"]}" stroke-width="2.5" />')
-            svg.append(f'<text x="{center_x}" y="{hub_y - 64}" font-family="{font}" font-size="22" font-weight="700" fill="{self.theme["primary"]}" text-anchor="middle">{num_str}</text>')
+            svg.append(f'<circle cx="{center_x}" cy="{hub_y - 80}" r="24" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
+            svg.append(f'<text x="{center_x}" y="{hub_y - 71}" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="middle">{num_str}</text>')
 
-            # Vector Icon inside Circle
-            svg.append(get_icon_svg_content(icon_key, center_x - 24, hub_y - 24, size=48, stroke_color=self.theme["secondary"]))
-
-            # Step Title in Circle Bottom
-            svg.append(f'<text x="{center_x}" y="{hub_y + 54}" font-family="{font}" font-size="21" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(s_title)}</text>')
+            # Step Title in Hub Bottom
+            svg.append(f'<text x="{center_x}" y="{hub_y + 72}" font-family="{font}" font-size="21" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(s_title)}</text>')
 
             # Style-aware Capsule Pod for Verbatim Description
             svg.extend(self._card_rect(pod_x, pod_y, step_w, pod_h, rx=32, stroke_width=2.0))
 
             # Verbatim Description with glowing circular dots
             desc_lines = s_desc.split("\n")
-            curr_y = pod_y + 60
+            curr_y = pod_y + 62
             tx = (pod_x + step_w - 36) if rtl else (pod_x + 36)
             for line in desc_lines[:7]:
                 clean_l = line.strip()
@@ -608,15 +493,9 @@ class SlideRenderer:
 
         font = self.theme.get('font_fa' if rtl else 'font_en')
         align = "end" if rtl else "start"
-        header_x = 1800 if rtl else 120
 
         svg = [self._header_svg(rtl, slide_idx=slide_idx)]
-
-        # Header
-        svg.append('<g id="header_group">')
-        svg.append(f'<text x="{header_x}" y="105" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(kicker)}</text>')
-        svg.append(f'<text x="{header_x}" y="165" font-family="{font}" font-size="48" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        svg.append('</g>')
+        svg.extend(self._render_style_header(slide, rtl, kicker))
 
         has_image = bool(image_rel_path)
         kpi_count = len(kpis)
@@ -627,9 +506,8 @@ class SlideRenderer:
             img_x = 110 if rtl else 1130
             img_y = 230
             svg.append('<g id="kpi_image">')
-            svg.append(f'<rect x="{img_x-6}" y="{img_y-6}" width="{img_w+12}" height="{img_h+12}" rx="36" fill="none" stroke="{self.theme["primary"]}" stroke-width="2" stroke-opacity="0.35" />')
-            svg.append(f'<rect x="{img_x}" y="{img_y}" width="{img_w}" height="{img_h}" rx="32" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
-            svg.append(f'<image href="{image_rel_path}" x="{img_x+10}" y="{img_y+10}" width="{img_w-20}" height="{img_h-20}" preserveAspectRatio="xMidYMid slice" />')
+            svg.extend(self._card_rect(img_x, img_y, img_w, img_h, rx=32, stroke_width=2.5))
+            svg.append(f'<image href="{image_rel_path}" x="{img_x+14}" y="{img_y+24}" width="{img_w-28}" height="{img_h-38}" preserveAspectRatio="xMidYMid slice" />')
             svg.append('</g>')
 
             stack_x = 840 if rtl else 110
@@ -701,20 +579,20 @@ class SlideRenderer:
                 svg.append('</g>')
 
                 svg.append(f'<g id="kpi_node_{i+1}">')
-                # Inner Glass Disc
-                svg.append(f'<circle cx="{center_x}" cy="{dial_y}" r="98" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3" />')
+                # Polymorphic KPI Hub Frame
+                svg.extend(self._card_rect(center_x - 95, dial_y - 88, 190, 176, rx=24, stroke_width=2.5))
 
-                # Giant KPI Numeral in Center of Circle
-                num_font_size = 72 if len(num_val) <= 5 else 54
+                # Giant KPI Numeral in Center
+                num_font_size = 66 if len(num_val) <= 5 else 50
                 svg.append(f'<text x="{center_x}" y="{dial_y + 24}" font-family="{font}" font-size="{num_font_size}" font-weight="700" fill="{self.theme["primary"]}" text-anchor="middle">{escape_xml(num_val)}</text>')
 
                 # Floating Trend Capsule attached under the circle
-                svg.append(f'<rect x="{center_x - 90}" y="{dial_y + 115}" width="180" height="42" rx="21" fill="{self.theme["badge_bg"]}" stroke="{self.theme["accent"]}" stroke-width="2" />')
+                svg.append(f'<rect x="{center_x - 90}" y="{dial_y + 115}" width="180" height="42" rx="12" fill="{self.theme["badge_bg"]}" stroke="{self.theme["accent"]}" stroke-width="2" />')
                 svg.append(f'<text x="{center_x}" y="{dial_y + 142}" font-family="{font}" font-size="17" font-weight="700" fill="{self.theme["accent"]}" text-anchor="middle">{escape_xml(trend)}</text>')
 
                 # Style-aware Pod for KPI Label and Verbatim Description
                 svg.extend(self._card_rect(pod_x, pod_y, card_w, pod_h, rx=32, stroke_width=2.0))
-                svg.append(f'<text x="{center_x}" y="{pod_y + 60}" font-family="{font}" font-size="28" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(k_label)}</text>')
+                svg.append(f'<text x="{center_x}" y="{pod_y + 62}" font-family="{font}" font-size="28" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="middle">{escape_xml(k_label)}</text>')
 
                 # Verbatim Description Lines
                 desc_lines = k_desc.split("\n")
@@ -751,15 +629,9 @@ class SlideRenderer:
 
         font = self.theme.get('font_fa' if rtl else 'font_en')
         align = "end" if rtl else "start"
-        header_x = 1800 if rtl else 120
 
         svg = [self._header_svg(rtl, slide_idx=slide_idx)]
-
-        # Header
-        svg.append('<g id="header_group">')
-        svg.append(f'<text x="{header_x}" y="105" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(kicker)}</text>')
-        svg.append(f'<text x="{header_x}" y="165" font-family="{font}" font-size="48" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        svg.append('</g>')
+        svg.extend(self._render_style_header(slide, rtl, kicker))
 
         card_w = 800
         card_h = 700
@@ -769,15 +641,9 @@ class SlideRenderer:
 
         # Column A (Muted / Problem / Traditional)
         svg.append('<g id="compare_col_a">')
-        if self.archetype == "neo_brutalist":
-            svg.append(f'<rect x="{ca_x+8}" y="{card_y+8}" width="{card_w}" height="{card_h}" rx="18" fill="#EF4444" />')
-            svg.append(f'<rect x="{ca_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="18" fill="{self.theme["surface"]}" stroke="#EF4444" stroke-width="3.5" />')
-        else:
-            svg.extend(self._card_rect(ca_x, card_y, card_w, card_h, rx=34, stroke_width=2.5, top_accent=False))
-        # Circular Icon Badge
-        svg.append(f'<circle cx="{ca_x+70}" cy="{card_y+65}" r="32" fill="{self.theme["background"]}" stroke="#EF4444" stroke-width="2" />')
-        svg.append(get_icon_svg_content("x", ca_x + 54, card_y + 49, size=32, stroke_color="#EF4444"))
-        svg.append(f'<text x="{ca_x+120}" y="{card_y+74}" font-family="{font}" font-size="26" font-weight="700" fill="#EF4444" text-anchor="start">{escape_xml(col_a.get("title", "سنتی"))}</text>')
+        svg.extend(self._card_rect(ca_x, card_y, card_w, card_h, rx=34, stroke_width=2.5, top_accent=False))
+        svg.extend(self._render_icon_badge(ca_x + 70, card_y + 68, 32, "#EF4444", "x", icon_size=32))
+        svg.append(f'<text x="{ca_x+120}" y="{card_y+76}" font-family="{font}" font-size="26" font-weight="700" fill="#EF4444" text-anchor="start">{escape_xml(col_a.get("title", "سنتی"))}</text>')
         
         # Items with circle-x icon (Verbatim)
         curr_y = card_y + 175
@@ -791,16 +657,9 @@ class SlideRenderer:
 
         # Column B (Vibrant / Solution / Smart)
         svg.append('<g id="compare_col_b">')
-        if self.archetype == "neo_brutalist":
-            shadow_b = "#000000" if not self.is_dark else self.theme.get("primary", "#A3E635")
-            svg.append(f'<rect x="{cb_x+8}" y="{card_y+8}" width="{card_w}" height="{card_h}" rx="18" fill="{shadow_b}" />')
-            svg.append(f'<rect x="{cb_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="18" fill="{self.theme["surface"]}" stroke="{self.theme["primary"]}" stroke-width="3.5" />')
-        else:
-            svg.extend(self._card_rect(cb_x, card_y, card_w, card_h, rx=34, stroke_width=3.0, top_accent=False))
-        # Circular Icon Badge
-        svg.append(f'<circle cx="{cb_x+70}" cy="{card_y+65}" r="32" fill="{self.theme["badge_bg"]}" stroke="{self.theme["primary"]}" stroke-width="2.5" />')
-        svg.append(get_icon_svg_content("check", cb_x + 54, card_y + 49, size=32, stroke_color=self.theme["primary"]))
-        svg.append(f'<text x="{cb_x+120}" y="{card_y+74}" font-family="{font}" font-size="26" font-weight="700" fill="{self.theme["primary"]}" text-anchor="start">✦ {escape_xml(col_b.get("title", "هوشمند"))}</text>')
+        svg.extend(self._card_rect(cb_x, card_y, card_w, card_h, rx=34, stroke_width=3.0, top_accent=False))
+        svg.extend(self._render_icon_badge(cb_x + 70, card_y + 68, 32, self.theme["primary"], "check", icon_size=32))
+        svg.append(f'<text x="{cb_x+120}" y="{card_y+76}" font-family="{font}" font-size="26" font-weight="700" fill="{self.theme["primary"]}" text-anchor="start">✦ {escape_xml(col_b.get("title", "هوشمند"))}</text>')
         
         # Items with circle-check icon (Verbatim)
         curr_y = card_y + 175
@@ -835,16 +694,9 @@ class SlideRenderer:
         rtl = is_persian(title) or any(is_persian(str(p)) for p in pods)
 
         font = self.theme.get('font_fa' if rtl else 'font_en')
-        align = "end" if rtl else "start"
-        header_x = 1800 if rtl else 120
 
         svg = [self._header_svg(rtl, slide_idx=slide_idx)]
-
-        # Header
-        svg.append('<g id="header_group">')
-        svg.append(f'<text x="{header_x}" y="105" font-family="{font}" font-size="20" font-weight="700" fill="{self.theme["primary"]}" text-anchor="{align}">{escape_xml(kicker)}</text>')
-        svg.append(f'<text x="{header_x}" y="165" font-family="{font}" font-size="48" font-weight="700" fill="{self.theme["text_main"]}" text-anchor="{align}">{escape_xml(title)}</text>')
-        svg.append('</g>')
+        svg.extend(self._render_style_header(slide, rtl, kicker))
 
         nucleus_cx = 960
         nucleus_cy = 580
